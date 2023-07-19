@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .calculator {
+      display: flex;
+      flex-direction: column;
+      width: 300px;
+      margin: 20px auto;
+      padding: 10px;
+      border: 1px solid black;
+      border-radius: 5px;
+      background-color: #000;
+    }
+
+    #result {
+      height: 40px;
+      font-size: 20px;
+      text-align: right;
+      margin-bottom: 10px;
+      background-color: #00f;
+      color: #000; /* Change the number output color to black */
+      border: none;
+      border-radius: 5px;
+      outline: none;
+      padding: 5px 10px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+
+    button {
+      height: 40px;
+      font-size: 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #00f;
+      color: #fff;
+    }
+
+    .precision {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #fff;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      resize: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <input type="text" id="result" disabled>
+    <div class="buttons">
+      <!-- Add buttons for numbers and basic math functions here -->
+      <button class="operator" onclick="clearResult()">C</button>
+      <button class="operator" onclick="backspace()">&#9003;</button>
+      <button class="operator" onclick="appendOperation('/')">&#247;</button>
+      <button class="operator" onclick="appendOperation('*')">&#215;</button>
+      <button onclick="appendNumber(7)">7</button>
+      <button onclick="appendNumber(8)">8</button>
+      <button onclick="appendNumber(9)">9</button>
+      <button class="operator" onclick="appendOperation('-')">&#8722;</button>
+      <button onclick="appendNumber(4)">4</button>
+      <button onclick="appendNumber(5)">5</button>
+      <button onclick="appendNumber(6)">6</button>
+      <button class="operator" onclick="appendOperation('+')">&#43;</button>
+      <button onclick="appendNumber(1)">1</button>
+      <button onclick="appendNumber(2)">2</button>
+      <button onclick="appendNumber(3)">3</button>
+      <button class="operator" onclick="calculate()">=</button>
+      <button onclick="appendNumber(0)">0</button>
+      <button onclick="appendDecimal()">.</button>
+      <button onclick="calculateSquareRoot()">√</button>
+      <button onclick="calculateCubeRoot()">∛</button>
+      <button onclick="calculatePower()">x<sup>y</sup></button>
+      <button onclick="calculateFactorial()">x!</button>
+    </div>
+    <div class="precision">
+      <label for="precisionInput">Decimal Precision:</label>
+      <input type="number" id="precisionInput" min="0" max="20" step="1" value="2">
+      <button onclick="updatePrecision()">Update</button>
+    </div>
+  </div>
+  <div id="longResultBox" class="hidden">
+    <h2>Long Result</h2>
+    <textarea id="longResult" disabled></textarea>
+  </div>
+  <script>
+    let currentResult = '0';
+    let longResult = '';
+    let currentOperator = null;
+    let decimalPrecision = 2;
+
+    function displayResult() {
+      document.getElementById('result').value = formatNumber(currentResult, decimalPrecision);
+    }
+
+    function formatNumber(number, precision) {
+      return parseFloat(number).toFixed(precision);
+    }
+
+    function appendNumber(number) {
+      if (currentResult === '0' || currentResult === '-0') {
+        currentResult = number.toString();
+      } else {
+        currentResult += number.toString();
+      }
+      displayResult();
+    }
+
+    function appendDecimal() {
+      if (!currentResult.includes('.')) {
+        currentResult += '.';
+      }
+      displayResult();
+    }
+
+    function appendOperation(operator) {
+      if (currentResult !== '') {
+        currentOperator = operator;
+        longResult += currentResult + ' ' + operator + ' ';
+        currentResult = '';
+      }
+    }
+
+    function calculate() {
+      if (currentOperator && currentResult !== '') {
+        longResult += currentResult + ' = ';
+        switch (currentOperator) {
+          case '+':
+            currentResult = (parseFloat(longResult) + parseFloat(currentResult)).toString();
+            break;
+          case '-':
+            currentResult = (parseFloat(longResult) - parseFloat(currentResult)).toString();
+            break;
+          case '*':
+            currentResult = (parseFloat(longResult) * parseFloat(currentResult)).toString();
+            break;
+          case '/':
+            currentResult = (parseFloat(longResult) / parseFloat(currentResult)).toString();
+            break;
+          case '^':
+            currentResult = Math.pow(parseFloat(longResult), parseFloat(currentResult)).toString();
+            break;
+          default:
+            break;
+        }
+        longResult += currentResult;
+        longResult = longResult.length > 30 ? longResult : '';
+        currentOperator = null;
+      }
+      displayResult();
+      displayLongResult();
+    }
+
+    function clearResult() {
+      currentResult = '0';
+      currentOperator = null;
+      longResult = '';
+      displayResult();
+      displayLongResult();
+    }
+
+    function backspace() {
+      currentResult = currentResult.slice(0, -1);
+      if (currentResult === '' || currentResult === '-') {
+        currentResult = '0';
+      }
+      displayResult();
+    }
+
+    function updatePrecision() {
+      const precisionInput = document.getElementById('precisionInput');
+      decimalPrecision = parseInt(precisionInput.value);
+      displayResult();
+    }
+
+    function displayLongResult() {
+      const longResultBox = document.getElementById('longResultBox');
+      const longResultTextArea = document.getElementById('longResult');
+      if (longResult) {
+        longResultBox.classList.remove('hidden');
+        longResultTextArea.value = longResult;
+      } else {
+        longResultBox.classList.add('hidden');
+      }
+    }
+
+    function calculateSquareRoot() {
+      if (currentResult !== '') {
+        currentResult = Math.sqrt(parseFloat(currentResult)).toString();
+        displayResult();
+      }
+    }
+
+    function calculateCubeRoot() {
+      if (currentResult !== '') {
+        currentResult = Math.cbrt(parseFloat(currentResult)).toString();
+        displayResult();
+      }
+    }
+
+    function calculatePower() {
+      if (currentResult !== '') {
+        appendOperation('^');
+      }
+    }
+
+    function calculateFactorial() {
+      if (currentResult !== '') {
+        const num = parseInt(currentResult);
+        if (num >= 0) {
+          let result = 1;
+          for (let i = 2; i <= num; i++) {
+            result *= i;
+          }
+          currentResult = result.toString();
+        } else {
+          currentResult = 'Error';
+        }
+        displayResult();
+      }
+    }
+
+    // Initialize the calculator
+    clearResult();
+  </script>
+</body>
+</html>

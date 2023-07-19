@@ -2,15 +2,11 @@
 <html>
 <head>
   <title>Calculator</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-
     .calculator {
-      display: flex;
-      flex-direction: column;
-      width: 300px;
+      width: fit-content;
       margin: 20px auto;
       padding: 10px;
       border: 1px solid black;
@@ -18,13 +14,14 @@
       background-color: #000;
     }
 
-    #result {
+    .calculator input[type="text"] {
+      width: 100%;
       height: 40px;
       font-size: 20px;
       text-align: right;
       margin-bottom: 10px;
       background-color: #00f;
-      color: #000; /* Change the number output color to black */
+      color: #fff;
       border: none;
       border-radius: 5px;
       outline: none;
@@ -37,7 +34,8 @@
       gap: 5px;
     }
 
-    button {
+    .buttons button {
+      width: 100%;
       height: 40px;
       font-size: 20px;
       border: none;
@@ -45,6 +43,37 @@
       cursor: pointer;
       background-color: #00f;
       color: #fff;
+      /* Adding 3D-like effect */
+      box-shadow: 0 2px 0 #000, 0 3px 0 #333;
+    }
+
+
+      /* Button press animation */
+      .pressed {
+      animation: buttonPress 0.1s;
+    }
+
+    /* Keyframes for hue rotation animation */
+    @keyframes rotateHue {
+      from {
+        filter: hue-rotate(0deg);
+      }
+      to {
+        filter: hue-rotate(360deg);
+      }
+    }
+
+    /* Keyframes for button press animation */
+    @keyframes buttonPress {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(0.95);
+      }
+      100% {
+        transform: scale(1);
+      }
     }
 
     .precision {
@@ -54,10 +83,8 @@
       color: #fff;
     }
 
-    textarea {
-      width: 100%;
-      height: 100px;
-      resize: none;
+    .precision input[type="number"] {
+      width: 70px;
     }
 
     .hidden {
@@ -66,45 +93,63 @@
   </style>
 </head>
 <body>
-  <div class="calculator">
-    <input type="text" id="result" disabled>
-    <div class="buttons">
-      <!-- Add buttons for numbers and basic math functions here -->
-      <button class="operator" onclick="clearResult()">C</button>
-      <button class="operator" onclick="backspace()">&#9003;</button>
-      <button class="operator" onclick="appendOperation('/')">&#247;</button>
-      <button class="operator" onclick="appendOperation('*')">&#215;</button>
-      <button onclick="appendNumber(7)">7</button>
-      <button onclick="appendNumber(8)">8</button>
-      <button onclick="appendNumber(9)">9</button>
-      <button class="operator" onclick="appendOperation('-')">&#8722;</button>
-      <button onclick="appendNumber(4)">4</button>
-      <button onclick="appendNumber(5)">5</button>
-      <button onclick="appendNumber(6)">6</button>
-      <button class="operator" onclick="appendOperation('+')">&#43;</button>
-      <button onclick="appendNumber(1)">1</button>
-      <button onclick="appendNumber(2)">2</button>
-      <button onclick="appendNumber(3)">3</button>
-      <button class="operator" onclick="calculate()">=</button>
-      <button onclick="appendNumber(0)">0</button>
-      <button onclick="appendDecimal()">.</button>
-      <button onclick="calculateSquareRoot()">√</button>
-      <button onclick="calculateCubeRoot()">∛</button>
-      <button onclick="calculatePower()">x<sup>y</sup></button>
-      <button onclick="calculateFactorial()">x!</button>
+  <div class="container mt-5">
+    <div class="calculator bg-dark text-white p-3 rounded">
+      <input type="text" id="result" disabled>
+      <div class="buttons">
+        <!-- Add buttons for numbers and basic math functions here -->
+        <button class="operator" onclick="clearResult()">C</button>
+        <button class="operator" onclick="backspace()">&#9003;</button>
+        <button class="operator" onclick="appendOperation('/')">&#247;</button>
+        <button class="operator" onclick="appendOperation('*')">&#215;</button>
+        <button onclick="appendNumber('7')">7</button>
+        <button onclick="appendNumber('8')">8</button>
+        <button onclick="appendNumber('9')">9</button>
+        <button class="operator" onclick="appendOperation('-')">&#8722;</button>
+        <button onclick="appendNumber('4')">4</button>
+        <button onclick="appendNumber('5')">5</button>
+        <button onclick="appendNumber('6')">6</button>
+        <button class="operator" onclick="appendOperation('+')">&#43;</button>
+        <button onclick="appendNumber('1')">1</button>
+        <button onclick="appendNumber('2')">2</button>
+        <button onclick="appendNumber('3')">3</button>
+        <button class="operator" onclick="calculate()">=</button>
+        <button onclick="appendNumber('0')">0</button>
+        <button onclick="appendDecimal()">.</button>
+        <button onclick="calculateSquareRoot()">√</button>
+        <button onclick="calculateCubeRoot()">∛</button>
+        <button onclick="calculatePower()">x<sup>y</sup></button>
+        <button onclick="calculateFactorial()">x!</button>
+      </div>
+      <div class="precision mt-3">
+        <label for="precisionInput">Decimal Precision:</label>
+        <input type="number" id="precisionInput" min="0" max="20" step="1" value="2">
+        <button onclick="updatePrecision()">Update</button>
+      </div>
     </div>
-    <div class="precision">
-      <label for="precisionInput">Decimal Precision:</label>
-      <input type="number" id="precisionInput" min="0" max="20" step="1" value="2">
-      <button onclick="updatePrecision()">Update</button>
+    <div id="longResultBox" class="hidden mt-3">
+      <h2>Long Result</h2>
+      <textarea id="longResult" class="form-control" disabled></textarea>
     </div>
-  </div>
-  <div id="longResultBox" class="hidden">
-    <h2>Long Result</h2>
-    <textarea id="longResult" disabled></textarea>
   </div>
   <script>
-    let currentResult = '0';
+    const buttons = document.querySelectorAll('.buttons button');
+
+buttons.forEach((button) => {
+  button.addEventListener('mousedown', () => {
+    button.classList.add('pressed');
+  });
+
+  button.addEventListener('mouseup', () => {
+    button.classList.remove('pressed');
+  });
+
+  button.addEventListener('mouseleave', () => {
+    button.classList.remove('pressed');
+  });
+});
+
+        let currentResult = '0';
     let longResult = '';
     let currentOperator = null;
     let decimalPrecision = 2;

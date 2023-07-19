@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Rotating 3D Cube</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, cube, outlineCube, cubes = [];
+        let mouseDown = false;
+        let startX, startY;
+        let rotationSpeed = 0.01;
+        let autoRotate = true;
+        let cubeSize = 2;
+        let hue = 0;
+
+        // Setup function
+        function init() {
+            // Create a scene
+            scene = new THREE.Scene();
+
+            // Create a camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            // Create a renderer
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Create a cube
+            const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+            const materials = [
+                new THREE.MeshBasicMaterial({ color: 0xffffff }), // Right face
+                new THREE.MeshBasicMaterial({ color: 0xffffff }), // Left face
+                new THREE.MeshBasicMaterial({ color: 0xffffff }), // Top face
+                new THREE.MeshBasicMaterial({ color: 0xffffff }), // Bottom face
+                new THREE.MeshBasicMaterial({ color: 0xffffff }), // Front face
+                new THREE.MeshBasicMaterial({ color: 0xffffff })  // Back face
+            ];
+            cube = new THREE.Mesh(geometry, materials);
+            scene.add(cube);
+
+            // Create the outline cube
+            const outlineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.BackSide });
+            outlineCube = new THREE.Mesh(geometry, outlineMaterial);
+            outlineCube.scale.multiplyScalar(1.1);
+            scene.add(outlineCube);
+
+            // Add event listeners for mouse interaction
+            document.addEventListener('mousedown', onMouseDown, false);
+            document.addEventListener('mousemove', onMouseMove, false);
+            document.addEventListener('mouseup', onMouseUp, false);
+
+            // Add event listener for mouse wheel to control rotation speed and cube size
+            document.addEventListener('wheel', onWheel, false);
+
+            // Add event listener for spacebar to toggle auto-rotation
+            document.addEventListener('keydown', onKeyDown, false);
+
+            // Create smaller cubes and add them to the scene
+            for (let i = 0; i < 100; i++) {
+                const smallCubeGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+                const smallCubeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const newSmallCube = new THREE.Mesh(smallCubeGeometry, smallCubeMaterial);
+                newSmallCube.position.set(Math.random() * 4 - 2, Math.random() * 4 - 2, Math.random() * 4 - 2);
+                cubes.push(newSmallCube);
+                scene.add(newSmallCube);
+            }
+
+            // Start the animation
+            animate();
+        }
+
+        // Animation function
+        function animate() {
+            // Update the cube's colors in HSL for a smooth rainbow transition
+            hue += 0.005;
+            if (hue > 1) hue -= 1;
+            cube.material[0].color.setHSL(hue, 1, 0.5); // Right face
+            cube.material[1].color.setHSL(hue, 1, 0.5); // Left face
+            cube.material[2].color.setHSL(hue, 1, 0.5); // Top face
+            cube.material[3].color.setHSL(hue, 1, 0.5); // Bottom face
+            cube.material[4].color.setHSL(hue, 1, 0.5); // Front face
+            cube.material[5].color.setHSL(hue, 1, 0.5); // Back face
+
+            // Update the cube rotation and outline rotation
+            if (autoRotate) {
+                cube.rotation.x += rotationSpeed;
+                cube.rotation.y += rotationSpeed;
+                outlineCube.rotation.copy(cube.rotation);
+            }
+
+            // Handle exploding small cubes
+            cubes.forEach(smallCube => {
+                smallCube.position.x += (Math.random() - 0.5) * 0.1;
+                smallCube.position.y += (Math.random() - 0.5) * 0.1;
+                smallCube.position.z += (Math.random() - 0.5) * 0.1;
+
+                smallCube.rotation.x += 0.02;
+                smallCube.rotation.y += 0.02;
+
+                // Respawn small cubes when they move too far from the center
+                if (
+                    smallCube.position.x > 2 || smallCube.position.x < -2 ||
+                    smallCube.position.y > 2 || smallCube.position.y < -2 ||
+                    smallCube.position.z > 2 || smallCube.position.z < -2
+                ) {
+                    smallCube.position.set(Math.random() * 4 - 2, Math.random() * 4 - 2, Math.random() * 4 - 2);
+                }
+            });
+
+            // Render the scene
+            renderer.render(scene, camera);
+
+            // Call the animation function recursively
+            requestAnimationFrame(animate);
+        }
+
+        // Mouse down event handler
+        function onMouseDown(event) {
+            mouseDown = true;
+            startX = event.clientX;
+            startY = event.clientY;
+        }
+
+        // Mouse move event handler
+        function onMouseMove(event) {
+            if (mouseDown) {
+                cube.rotation.y += (startX - event.clientX) * 0.005;
+                cube.rotation.x += (startY - event.clientY) * 0.005;
+                outlineCube.rotation.copy(cube.rotation);
+
+                startX = event.clientX;
+                startY = event.clientY;
+            }
+        }
+
+        // Mouse up event handler
+        function onMouseUp() {
+            mouseDown = false;
+        }
+
+        // Mouse wheel event handler
+        function onWheel(event) {
+            rotationSpeed += event.deltaY * 0.0001;
+            cubeSize += event.deltaY * 0.01;
+            cubeSize = Math.max(0.1, cubeSize); // Ensure minimum cube size
+        }
+
+        // Spacebar key event handler
+        function onKeyDown(event) {
+            if (event.code === 'Space') {
+                autoRotate = !autoRotate;
+            }
+        }
+
+        // Call the setup function
+        init();
+    </script>
+</body>
+</html>

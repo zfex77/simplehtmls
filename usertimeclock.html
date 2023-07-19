@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Millisecond Precision User Time</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0;
+            padding: 10px;
+            font-size: 28px;
+        }
+
+        p {
+            margin: 5px 0;
+            font-size: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Millisecond Precision User Time</h1>
+        <p id="user-time"></p>
+    </div>
+
+    <script>
+        // Function to update the time on the page every millisecond
+        function updateRealTime() {
+            const currentTime = new Date();
+            const hours = currentTime.getHours().toString().padStart(2, '0');
+            const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+            const seconds = currentTime.getSeconds().toString().padStart(2, '0');
+            const milliseconds = currentTime.getMilliseconds().toString().padStart(3, '0');
+
+            const timeString = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+            document.getElementById('user-time').innerText = timeString;
+        }
+
+        // Update the time every millisecond (1 millisecond)
+        setInterval(updateRealTime, 1);
+
+        // Call the function to display the initial time
+        updateRealTime();
+    </script>
+</body>
+</html>

@@ -1,16 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-      <ul>
-        <li><a href="cac.html">cac.html</a></li>	
-	<li><a href="image.html">image.html</a></li>
-	<li><a href="supercube.html">supercube.html</a></li>
-	<li><a href="user.html">user.html</a></li>	
-	<li><a href="usertimeclock.html">usertimeclock.html</a></li>
-	<li><a href="base64.html">base64.html</a></li>
-	<li><a href="webptopng.html">webptopng.html</a></li>
-      </ul>
-    </nav>
+  <title>Improved Bootstrap Example</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body {
+      animation: gradientAnimation 5s linear infinite;
+      background: linear-gradient(to right, black, blue, black);
+      background-size: 200% 100%;
+    }
+
+    @keyframes gradientAnimation {
+      0%, 100% {
+        background-position: 0 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    header h1 {
+      color: white;
+      animation: textAnimation 4s ease-in-out infinite;
+    }
+
+  ul.list-group {
+      color: black;
+      animation: textAnimation 4s ease-in-out infinite;
+    }
+
+    @keyframes textAnimation {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      50% {
+        transform: translateX(5px);
+		transform: translateY(5px);
+      }
+    }
+
+    ul.list-group {
+      list-style: none;
+      padding: 0;
+    }
+
+
+    ul.list-group li a:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <header class="container mt-4">
+    <h1>List of Pages</h1>
+    <ul class="list-group">
+      <li class="list-group-item"><a href="cac.html">cac.html</a></li>
+      <li class="list-group-item"><a href="image.html">image.html</a></li>
+      <li class="list-group-item"><a href="supercube.html">supercube.html</a></li>
+      <li class="list-group-item"><a href="user.html">user.html</a></li>
+      <li class="list-group-item"><a href="usertimeclock.html">usertimeclock.html</a></li>
+      <li class="list-group-item"><a href="base64.html">base64.html</a></li>
+      <li class="list-group-item"><a href="webptopng.html">webptopng.html</a></li>
+    </ul>
   </header>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

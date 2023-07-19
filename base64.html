@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 Encryption and Decryption</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            transition: background-color 0.5s ease;
+            background-color: #f8f9fa;
+            color: #000000;
+        }
+
+        body.dark-mode {
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+
+        .encryption-box {
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+        }
+
+        .encryption-box.dark-mode {
+            background-color: #424242;
+            border-color: #f8f9fa;
+            color: #f8f9fa;
+        }
+
+        .encryption-box.dark-mode h2 {
+            color: #f8f9fa;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .reset-btn {
+            margin-top: 0px;
+        }
+
+        .dark-mode-toggle {
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode-toggle.dark-mode {
+            transform: rotate(180deg);
+            color: #f8f9fa;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: rotate(15deg);
+        }
+
+        textarea {
+            transition: background-color 0.5s ease;
+        }
+
+        textarea.dark-mode {
+            background-color: #505050;
+            color: #f8f9fa;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #1b692e;
+            border-color: #1b692e;
+        }
+
+        .btn-outline-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-outline-danger:hover {
+            color: #ffffff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="encryption-box">
+                    <h2>Base64 Encryption/Decryption</h2>
+                    <textarea id="inputText" class="form-control" rows="5" placeholder="Enter text to encrypt/decrypt"></textarea>
+                    <textarea id="outputText" class="form-control mt-3" rows="5" readonly></textarea>
+                    <div class="btn-group mt-3">
+                        <button id="encryptBtn" class="btn btn-primary mr-3">Encrypt</button>
+                        <button id="decryptBtn" class="btn btn-success mr-3">Decrypt</button>
+                        <button id="resetBtn" class="btn btn-outline-danger reset-btn">Reset All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <span class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function utf8ToBase64(text) {
+            const utf8Encoder = new TextEncoder();
+            const data = utf8Encoder.encode(text);
+            const base64 = btoa(String.fromCharCode(...data));
+            return base64;
+        }
+
+        function base64ToUtf8(base64) {
+            const binaryStr = atob(base64);
+            const binaryData = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+                binaryData[i] = binaryStr.charCodeAt(i);
+            }
+            const utf8Decoder = new TextDecoder();
+            const utf8Text = utf8Decoder.decode(binaryData);
+            return utf8Text;
+        }
+
+        function base64EncryptDecrypt(isEncrypt) {
+            const inputText = document.getElementById('inputText').value;
+            if (isEncrypt) {
+                const encryptedText = utf8ToBase64(inputText);
+                document.getElementById('outputText').value = encryptedText;
+            } else {
+                const decryptedText = base64ToUtf8(inputText);
+                document.getElementById('outputText').value = decryptedText;
+            }
+        }
+
+        function resetTextAreas() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').value = '';
+        }
+
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            const encryptionBox = document.querySelector('.encryption-box');
+            encryptionBox.classList.toggle('dark-mode');
+            const darkModeToggle = document.querySelector('.dark-mode-toggle');
+            darkModeToggle.classList.toggle('dark-mode');
+            if (darkModeToggle.classList.contains('dark-mode')) {
+                darkModeToggle.innerHTML = '💡';
+            } else {
+                darkModeToggle.innerHTML = '🌙';
+            }
+        }
+
+        document.getElementById('encryptBtn').addEventListener('click', function() {
+            base64EncryptDecrypt(true);
+        });
+
+        document.getElementById('decryptBtn').addEventListener('click', function() {
+            base64EncryptDecrypt(false);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', resetTextAreas);
+    </script>
+</body>
+</html>

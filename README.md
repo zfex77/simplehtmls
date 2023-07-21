@@ -15,11 +15,23 @@ At the moment, the [image editor SimpleHTML](https://github.com/zfex77/simplehtm
 - Need to implement Bootstrap for the interface
 - Also... I want to add more features to make it more useful.
 
-I'll get this done within a couple of days. I will update this doc with my progress.
+I'll get this done within 2-7 days. I will update this doc with my progress.
 
-- [x] Under Development
-- [ ] Implement Features
-- [ ] Polish with Bootstrap
-- [ ] Bug Check
-- [ ] Finished
+### Getting Started for Development
+  - [x] Create Roadmap
+  - [ ] Start Development
+### Implement Features
+  - [ ] Add Hue Changing
+  - [ ] Convert to B&W, etc
+  - [ ] Edit Multiple Images 
+    - [ ] Edit With Same Options
+    - [ ] Edit With Different Options _(much harder and will take long!)_
+### Polish with Bootstrap
+  - [ ] Implementation
+### Bug Fix
+  - [ ] Testing for Bugs
+  - [ ] Fix **Current** Bug where contrast and brightness sliders add values, not set them. (this is due to poor code.)
+### Finishing
+  - [ ] Update index.html
+  - [ ] Done!
 

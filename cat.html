@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Random Cat Picture</title>
+  <!-- Include Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <h1 class="mb-4">Random Cats</h1>
+        <div class="form-group">
+          <label for="cat_service">Select a Cat Service:</label>
+          <select id="cat_service" class="form-control">
+            <option value="TheCatAPI (fast)">TheCatAPI (fast)</option>
+            <option value="CatAAS (slow-ish)">CatAAS (slow-ish)</option>
+            <!-- Add more options for other services if needed -->
+          </select>
+        </div>
+        <button id="button3" class="btn btn-primary mb-3">Gimme Cat</button>
+        <div class="form-group">
+          <label for="cat_tag">Enter a Tag (only works with some tags, CatAAS feature):</label>
+          <input type="text" id="cat_tag" class="form-control" placeholder="Enter a cat tag">
+        </div>
+        <button id="button_search" class="btn btn-primary mb-3">Gimme Cat with Tag</button>
+        <div id="loading_spinner" class="spinner-border text-primary" role="status" style="display: none;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <div id="cat_result" class="text-center"></div>
+        <div id="loading_error" class="alert alert-danger mt-3" role="alert" style="display: none;">
+          This cat image doesn't exist.
+        </div>
+        <div id="no_tag_warning" class="alert alert-warning mt-3" role="alert" style="display: none;">
+          No tag?
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include Bootstrap JavaScript (and its dependencies) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+      // Function to fetch and display a random cat picture
+    function displayRandomCatPicture() {
+      // Show the loading spinner
+      document.getElementById('loading_spinner').style.display = 'block';
+      // Hide the previous error message if any
+      document.getElementById('loading_error').style.display = 'none';
+      document.getElementById('no_tag_warning').style.display = 'none';
+
+      const catService = document.getElementById('cat_service').value;
+
+      let apiUrl;
+      if (catService === 'CatAAS (slow-ish)') {
+        apiUrl = 'https://cataas.com/cat';
+      } else if (catService === 'TheCatAPI (fast)') {
+        apiUrl = 'https://api.thecatapi.com/v1/images/search';
+      } else if (catService === 'randomcat') {
+        apiUrl = 'https://aws.random.cat/meow';
+      }
+      // Add more conditions for other cat services if needed
+
+      // Fetch image from the selected API
+      fetch(apiUrl)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          if (catService === 'TheCatAPI (fast)' || catService === 'randomcat') {
+            return response.json(); // Parse JSON for The Cat API and RandomCat API
+          } else {
+            return response; // For other APIs, return the response as-is
+          }
+        })
+        .then((data) => {
+          // Get the image URL based on the selected service
+          let imageUrl;
+          if (catService === 'CatAAS (slow-ish)') {
+            imageUrl = apiUrl + '?_=' + new Date().getTime();
+          } else if (catService === 'TheCatAPI (fast)') {
+            imageUrl = data[0].url;
+          } else if (catService === 'randomcat') {
+            imageUrl = data.file;
+          }
+          // Add more conditions for other cat services if needed
+
+          // Display the random cat image to the user
+          const catImage = new Image();
+          catImage.onload = () => {
+            // Hide the loading spinner
+            document.getElementById('loading_spinner').style.display = 'none';
+            const catResult = document.getElementById('cat_result');
+            catResult.innerHTML = ''; // Clear previous image
+            catResult.appendChild(catImage);
+          };
+          catImage.onerror = () => {
+            // Hide the loading spinner
+            document.getElementById('loading_spinner').style.display = 'none';
+            // Show the loading error message
+            document.getElementById('loading_error').style.display = 'block';
+          };
+          catImage.src = imageUrl;
+          catImage.alt = 'Random Cat Picture';
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          // Hide the loading spinner
+          document.getElementById('loading_spinner').style.display = 'none';
+          // Show the loading error message
+          document.getElementById('loading_error').style.display = 'block';
+        });
+    }
+
+    // Function to fetch and display a cat picture with the provided tag
+    function displayCatPictureWithTag() {
+      // Show the loading spinner
+      document.getElementById('loading_spinner').style.display = 'block';
+      // Hide the previous error message if any
+      document.getElementById('loading_error').style.display = 'none';
+      document.getElementById('no_tag_warning').style.display = 'none';
+
+      const catTag = document.getElementById('cat_tag').value;
+      if (!catTag) {
+        // If no tag is provided, show a warning message
+        document.getElementById('no_tag_warning').style.display = 'block';
+        // Hide the loading spinner
+        document.getElementById('loading_spinner').style.display = 'none';
+        return;
+      }
+
+      // Construct the URL with the provided tag
+      const apiUrl = `https://cataas.com/cat/${catTag}`;
+
+      // Fetch the image with the provided tag
+      fetch(apiUrl)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.blob(); // Get the image data as a Blob
+        })
+        .then((data) => {
+          // Display the cat image to the user
+          const catImage = new Image();
+          catImage.onload = () => {
+            // Hide the loading spinner
+            document.getElementById('loading_spinner').style.display = 'none';
+            const catResult = document.getElementById('cat_result');
+            catResult.innerHTML = ''; // Clear previous image
+            catResult.appendChild(catImage);
+          };
+          catImage.onerror = () => {
+            // Hide the loading spinner
+            document.getElementById('loading_spinner').style.display = 'none';
+            // Show the loading error message
+            document.getElementById('loading_error').style.display = 'block';
+          };
+          catImage.src = URL.createObjectURL(data); // Create a URL for the Blob data
+          catImage.alt = 'Random Cat Picture';
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          // Hide the loading spinner
+          document.getElementById('loading_spinner').style.display = 'none';
+          // Show the loading error message
+          document.getElementById('loading_error').style.display = 'block';
+        });
+    }
+
+    // Attach click event listener to the "Get Random Cat Picture" button
+    const element2 = document.getElementById('button3');
+    element2.addEventListener('click', displayRandomCatPicture);
+
+    // Attach click event listener to the "Search Cat Picture" button
+    const searchButton = document.getElementById('button_search');
+    searchButton.addEventListener('click', displayCatPictureWithTag);
+
+    // Function to display the popup modal with the "Hello World!" message
+    function displayHelloWorldModal() {
+      // Create the modal content
+      const modalContent = `
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Reddit API Usage</h5>
+            </div>
+            <div class="modal-body">
+              <p>This SimpleHTML doesn't use the <span style="color: orange; font-weight: bold;">RedditAPI</span> to <span style="color: orange; font-weight: bold;">display</span> <span style="color: orange; font-weight: bold;">cat</span> <span style="color: orange; font-weight: bold;">images</span>. You might be asking: <span style="color: blue; font-weight: bold;">"Why?"</span> and this is because of two reasons. One reason is that it is just hard to implement this stupid <span style="color: orange; font-weight: bold;">RedditAPI</span> ('cus I'm dumb probably) and also because <span style="color: orange; font-weight: bold;">Reddit</span> changed their API policies and I don't like 'em. So sorry... ya'll get <span style="color: purple; font-weight: bold;">CatAAS</span> and <span style="color: purple; font-weight: bold;">TheCatAPI</span>.</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Create the modal container
+      const modalContainer = document.createElement('div');
+      modalContainer.classList.add('modal', 'fade');
+      modalContainer.setAttribute('id', 'helloWorldModal');
+      modalContainer.setAttribute('tabindex', '-1');
+      modalContainer.setAttribute('aria-labelledby', 'helloWorldModalLabel');
+      modalContainer.setAttribute('aria-hidden', 'true');
+
+      // Add the modal content to the container
+      modalContainer.innerHTML = modalContent;
+
+      // Append the modal container to the document body
+      document.body.appendChild(modalContainer);
+
+      // Show the modal
+      $('#helloWorldModal').modal('show');
+
+      // Attach event listener to handle modal dismissal
+      $('#helloWorldModal').on('hidden.bs.modal', function () {
+        // Remove the modal from the DOM when it's hidden to prevent duplicates
+        document.body.removeChild(modalContainer);
+      });
+    }
+
+    // Automatically show the "Hello World" modal when the page loads
+    window.addEventListener('load', displayHelloWorldModal);
+  </script>
+</body>
+</html>

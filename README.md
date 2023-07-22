@@ -19,7 +19,7 @@ I'll get this done within 2-7 days. I will update this doc with my progress.
 
 ### Getting Started for Development
   - [x] Create Roadmap
-  - [ ] Start Development
+  - [x] Start Development
 ### Implement Features
   - [ ] Add Hue Changing
   - [ ] Convert to B&W, etc

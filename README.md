@@ -30,7 +30,7 @@ I'll get this done within 2-7 days. I will update this doc with my progress.
     - [ ] Edit With Same Options
     - [ ] Edit With Different Options _(much harder and will take long!)_
 ### Polish with Bootstrap
-  - [ ] Implementation
+  - [x] Implementation
 ### Bug Fix
   - [ ] Testing for Bugs
   - [ ] Fix **Current** Bug where contrast and brightness sliders add values, not set them. (this is due to poor code.)

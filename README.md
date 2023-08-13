@@ -4,9 +4,11 @@ These are just SimpleHTMLs that do simple functions. I will update suff when I f
 
 ![logo](https://raw.githubusercontent.com/zfex77/simplehtmls/src/plasticdots-personal-use-regular.png)
 
-## <ins>Two Ways to Access</ins>
-- If you're connected to the internet and want to access the SimpleHTMLs go on over to https://zfex77.github.io/simplehtmls/
-- To download the latest version to run locally just [download it.](https://github.com/zfex77/simplehtmls/archive/refs/heads/main.zip) It should work just by putting all the HTMLs **(IN THE SAME DIRECTORY... VERY IMPORTANT)** and running the index.html
+## <ins>Ways to Access</ins>
+- https://zfex77.github.io/simplehtmls
+- https://simplehtmls.pages.dev
+- https://us2-simplehtmls.pages.dev (outdated)
+- https://us3-simplehtmls.pages.dev (outdated)
 
 ## <ins> Beta SimpleHTMLs (not developed fully) </ins> ##
 Currently, I am going to use the code from the beta to implement it into the [Random Cat Image Generator](https://zfex77.github.io/simplehtmls/cat.html) but first I want to make sure the beta is nice and functional (without being buggy.) I just updated the beta to [v1.1](https://zfex77.github.io/simplehtmls/beta/subimgviewer.html), so go over and try it!

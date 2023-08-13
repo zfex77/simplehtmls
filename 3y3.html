@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3y3 Encoder/Decoder</title>
+  <!-- Include Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-lg-8 offset-lg-2">
+        <h1 class="text-center">3y3 Encoder/Decoder </h1>
+		<p class="text-center">The javascript code was created by this <a href="https://github.com/ArjixWasTaken/3y3/">guy</a></p>
+        <div class="form-group">
+          <label for="inputText">Enter Text:</label>
+          <textarea class="form-control" id="inputText" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary" id="encodeBtn">Encode</button>
+          <button class="btn btn-success" id="decodeBtn">Decode</button>
+          <button class="btn btn-warning" id="detectBtn">Detect</button>
+          <button class="btn btn-secondary" id="copyBtn">Copy Text</button>
+          <button class="btn btn-danger" id="resetBtn">Reset</button>
+        </div>
+        <div class="form-group">
+          <label for="outputText">Output:</label>
+          <div class="input-group">
+            <textarea class="form-control" id="outputText" rows="3" readonly></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include Bootstrap JS and your JavaScript code -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    const encode = (/**@type {string}*/ text) => {
+      const codePoints = [...text].map((c) => c.codePointAt(0));
+
+      const output = [];
+      for (const char of codePoints) {
+        output.push(
+          String.fromCodePoint(
+            char + (0x00 < char && char < 0x7f ? 0xe0000 : 0)
+          ).toString()
+        );
+      }
+
+      return output.join("");
+    };
+
+    const decode = (/**@type {string}*/ text) => {
+      const codePoints = [...text].map((c) => c.codePointAt(0));
+
+      const output = [];
+      for (const char of codePoints) {
+        output.push(
+          String.fromCodePoint(
+            char - (0xe0000 < char && char < 0xe007f ? 0xe0000 : 0)
+          ).toString()
+        );
+      }
+
+      return output.join("");
+    };
+
+    const detect = (/**@type {string}*/ text) => {
+      const codePoints = [...text].map((c) => c.codePointAt(0));
+      return codePoints.some((c) => 0xe0000 < c && c < 0xe007f);
+    };
+
+    // DOM manipulation
+    const inputText = document.getElementById("inputText");
+    const outputText = document.getElementById("outputText");
+    const encodeBtn = document.getElementById("encodeBtn");
+    const decodeBtn = document.getElementById("decodeBtn");
+    const detectBtn = document.getElementById("detectBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    encodeBtn.addEventListener("click", () => {
+      const input = inputText.value;
+      const encoded = encode(input);
+      outputText.value = encoded;
+    });
+
+    decodeBtn.addEventListener("click", () => {
+      const input = inputText.value;
+      const decoded = decode(input);
+      outputText.value = decoded;
+    });
+
+    detectBtn.addEventListener("click", () => {
+      const input = inputText.value;
+      const isDetected = detect(input);
+      outputText.value = isDetected ? "Text is 3y3 encoded." : "Text is not 3y3 encoded.";
+    });
+
+    copyBtn.addEventListener("click", () => {
+      const output = outputText.value;
+      if (output) {
+        navigator.clipboard.writeText(output)
+          .then(() => {
+            // Highlight the copy button in green for a second
+            copyBtn.classList.add("highlight-green", "highlighted");
+            setTimeout(() => {
+              copyBtn.classList.remove("highlighted");
+            }, 1000);
+          })
+          .catch((error) => {
+            console.error("Error copying text:", error);
+          });
+      }
+    });
+
+    resetBtn.addEventListener("click", () => {
+      inputText.value = "";
+      outputText.value = "";
+    });
+  </script>
+</body>
+</html>

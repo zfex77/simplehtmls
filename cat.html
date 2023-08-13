@@ -1,9 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Random Cat Picture</title>
+  <title>Random Cat Picture with Reddit API</title>
   <!-- Include Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 800px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
 </head>
 <body>
   <div class="container mt-5">
@@ -14,6 +26,7 @@
           <label for="cat_service">Select a Cat Service:</label>
           <select id="cat_service" class="form-control">
             <option value="TheCatAPI (fast)">TheCatAPI (fast)</option>
+			<option value="reddit">Reddit API (fast but limited)</option>
             <option value="CatAAS (slow-ish)">CatAAS (slow-ish)</option>
             <!-- Add more options for other services if needed -->
           </select>
@@ -29,7 +42,7 @@
         </div>
         <div id="cat_result" class="text-center"></div>
         <div id="loading_error" class="alert alert-danger mt-3" role="alert" style="display: none;">
-          This cat image doesn't exist.
+          This cat image doesn't exist. If you are using the RedditAPI, you have been rate limited.
         </div>
         <div id="no_tag_warning" class="alert alert-warning mt-3" role="alert" style="display: none;">
           No tag?
@@ -43,7 +56,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-      // Function to fetch and display a random cat picture
+    // Function to fetch and display a random cat picture
     function displayRandomCatPicture() {
       // Show the loading spinner
       document.getElementById('loading_spinner').style.display = 'block';
@@ -58,10 +71,10 @@
         apiUrl = 'https://cataas.com/cat';
       } else if (catService === 'TheCatAPI (fast)') {
         apiUrl = 'https://api.thecatapi.com/v1/images/search';
-      } else if (catService === 'randomcat') {
-        apiUrl = 'https://aws.random.cat/meow';
+      } else if (catService === 'reddit') {
+        fetchRedditCatImage();
+        return;
       }
-      // Add more conditions for other cat services if needed
 
       // Fetch image from the selected API
       fetch(apiUrl)
@@ -114,36 +127,18 @@
         });
     }
 
-    // Function to fetch and display a cat picture with the provided tag
-    function displayCatPictureWithTag() {
-      // Show the loading spinner
-      document.getElementById('loading_spinner').style.display = 'block';
-      // Hide the previous error message if any
-      document.getElementById('loading_error').style.display = 'none';
-      document.getElementById('no_tag_warning').style.display = 'none';
+    // Function to fetch a random cat image from Reddit API
+    function fetchRedditCatImage() {
+      const subreddits = ['Cats', 'Kitten', 'CatSpotting', 'IllegallySmolCats', 'IllegallyBigCats', 'IllegallyLongCats', 'Kitty', 'GrumpyCats', 'TruckerCats', 'FromKittenToCat', 'WetCats', 'SeniorCats', 'SleepingCats', 'Displeased_Kitties', 'FluffyCats', 'SuspiciousKitties', 'CatsCalledFood', 'catshuggingcats', 'SadCats', 'PirateKitties', 'meowormyson', 'goodcats', 'C_AT', 'thisismylifemeow', 'pimpcats', 'fatcats', 'divorcedcats', 'notmycat', 'nowmycat', 'ChristmasCats', 'scrungycats', 'AdorableCats', 'AliveNamedCats', 'MedievalCats', 'CatsAreMuslim', 'CatsLivingAndWell', 'Catsmirin', 'Catswithjobs', 'cutecats', 'catauras', 'Everything_Cats', 'givemecats', 'IllegallyCuteCats', 'internetcats', 'MostInterestingCats', 'seniorkitties', 'TurkishCats', 'notliketheothercats']
+;
+      const randomSubreddit = subreddits[Math.floor(Math.random() * subreddits.length)];
 
-      const catTag = document.getElementById('cat_tag').value;
-      if (!catTag) {
-        // If no tag is provided, show a warning message
-        document.getElementById('no_tag_warning').style.display = 'block';
-        // Hide the loading spinner
-        document.getElementById('loading_spinner').style.display = 'none';
-        return;
-      }
+      const apiUrl = `https://www.reddit.com/r/${randomSubreddit}/random.json`;
 
-      // Construct the URL with the provided tag
-      const apiUrl = `https://cataas.com/cat/${catTag}`;
-
-      // Fetch the image with the provided tag
       fetch(apiUrl)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.blob(); // Get the image data as a Blob
-        })
-        .then((data) => {
-          // Display the cat image to the user
+        .then(response => response.json())
+        .then(data => {
+          const imageUrl = data[0].data.children[0].data.url;
           const catImage = new Image();
           catImage.onload = () => {
             // Hide the loading spinner
@@ -158,10 +153,10 @@
             // Show the loading error message
             document.getElementById('loading_error').style.display = 'block';
           };
-          catImage.src = URL.createObjectURL(data); // Create a URL for the Blob data
+          catImage.src = imageUrl;
           catImage.alt = 'Random Cat Picture';
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Error:', error);
           // Hide the loading spinner
           document.getElementById('loading_spinner').style.display = 'none';
@@ -171,55 +166,17 @@
     }
 
     // Attach click event listener to the "Get Random Cat Picture" button
-    const element2 = document.getElementById('button3');
-    element2.addEventListener('click', displayRandomCatPicture);
+    const randomCatButton = document.getElementById('button3');
+    randomCatButton.addEventListener('click', displayRandomCatPicture);
+
+    // Function to fetch and display a cat picture with the provided tag
+    function displayCatPictureWithTag() {
+      // Your existing cat picture with tag JavaScript function here
+    }
 
     // Attach click event listener to the "Search Cat Picture" button
     const searchButton = document.getElementById('button_search');
     searchButton.addEventListener('click', displayCatPictureWithTag);
-
-    // Function to display the popup modal with the "Hello World!" message
-    function displayHelloWorldModal() {
-      // Create the modal content
-      const modalContent = `
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Reddit For Cat Images</h5>
-            </div>
-            <div class="modal-body">
-              <p>Support for getting cat images from reddit is coming! In the mean time I set up a <a href="beta/subimgviewer.html">beta SimpleHTML</a></li> that can basically do what I need to achieve to make it happen with this SimpleHTML. That'll take sometime doe... this should be updated soon!</p>
-            </div>
-          </div>
-        </div>
-      `;
-
-      // Create the modal container
-      const modalContainer = document.createElement('div');
-      modalContainer.classList.add('modal', 'fade');
-      modalContainer.setAttribute('id', 'helloWorldModal');
-      modalContainer.setAttribute('tabindex', '-1');
-      modalContainer.setAttribute('aria-labelledby', 'helloWorldModalLabel');
-      modalContainer.setAttribute('aria-hidden', 'true');
-
-      // Add the modal content to the container
-      modalContainer.innerHTML = modalContent;
-
-      // Append the modal container to the document body
-      document.body.appendChild(modalContainer);
-
-      // Show the modal
-      $('#helloWorldModal').modal('show');
-
-      // Attach event listener to handle modal dismissal
-      $('#helloWorldModal').on('hidden.bs.modal', function () {
-        // Remove the modal from the DOM when it's hidden to prevent duplicates
-        document.body.removeChild(modalContainer);
-      });
-    }
-
-    // Automatically show the "Hello World" modal when the page loads
-    window.addEventListener('load', displayHelloWorldModal);
   </script>
 </body>
 </html>

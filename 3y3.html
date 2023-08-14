@@ -95,11 +95,15 @@
       outputText.value = decoded;
     });
 
-    detectBtn.addEventListener("click", () => {
-      const input = inputText.value;
-      const isDetected = detect(input);
-      outputText.value = isDetected ? "Text is 3y3 encoded." : "Text is not 3y3 encoded.";
-    });
+detectBtn.addEventListener("click", () => {
+  const input = inputText.value;
+  const isDetected = detect(input);
+  const numCharacters = input.length;
+  const detectionResult = isDetected
+    ? `3y3 text detected. Number of characters: ${numCharacters}`
+    : `No 3y3 text was detected. Number of characters: ${numCharacters}`;
+  outputText.value = detectionResult;
+});
 
     copyBtn.addEventListener("click", () => {
       const output = outputText.value;

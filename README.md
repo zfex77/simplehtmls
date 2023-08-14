@@ -10,33 +10,5 @@ These are just SimpleHTMLs that do simple functions. I will update suff when I f
 - https://us2-simplehtmls.pages.dev (outdated)
 - https://us3-simplehtmls.pages.dev (outdated)
 
-## <ins> Beta SimpleHTMLs (not developed fully) </ins> ##
-Currently, I am going to use the code from the beta to implement it into the [Random Cat Image Generator](https://zfex77.github.io/simplehtmls/cat.html) but first I want to make sure the beta is nice and functional (without being buggy.) I just updated the beta to [v1.1](https://zfex77.github.io/simplehtmls/beta/subimgviewer.html), so go over and try it!
-
-## <ins>Under Development ⚒️</ins>
-At the moment, the [image editor SimpleHTML](https://github.com/zfex77/simplehtmls/blob/main/in%20development%20(will%20be%20deleted%20after%20finished)/image.html) is under development. You might ask... _**why?**_
-- The UI isn't that great
-- The contrast and brightness sliders are buggy
-- Need to implement Bootstrap for the interface
-- Also... I want to add more features to make it more useful.
-
-I'll get this done within 2-7 days. I will update this doc with my progress.
-
-### Getting Started for Development
-  - [x] Create Roadmap
-  - [x] Start Development
-### Implement Features
-  - [ ] Add Hue Changing
-  - [ ] Convert to B&W, etc
-  - [ ] Edit Multiple Images 
-    - [ ] Edit With Same Options
-    - [ ] Edit With Different Options _(much harder and will take long!)_
-### Polish with Bootstrap
-  - [x] Implementation
-### Bug Fix
-  - [ ] Testing for Bugs
-  - [ ] Fix **Current** Bug where contrast and brightness sliders add values, not set them. (this is due to poor code.)
-### Finishing
-  - [ ] Update index.html
-  - [ ] Done!
-
+To-Do
+- add encryption option (like password and key using AES encryption) to pastebin

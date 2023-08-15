@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🌊</title>
+    <!-- Include Bootstrap CSS link here -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom CSS for the output box */
+        #output-box {
+            word-wrap: break-word; /* Enable line wrapping */
+            white-space: pre-line; /* Preserve line breaks */
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center mb-4">Text Expansion 🌊</h2>
+            <p class="text-center mb-4">Why compress text when you can make it bigger?</p>           
+			 <div class="form-group">
+                <label for="inputText">Enter text here</label>
+                <textarea class="form-control" id="inputText" rows="3" placeholder="Enter text here"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="repeatCount">Repeat Count</label>
+                <input type="text" class="form-control" id="repeatCount" value="3">
+            </div>
+            <div class="form-group">
+                <label for="specialKey">Special Key</label>
+                <input type="text" class="form-control" id="specialKey" placeholder="Enter your key...">
+            </div>
+            <button class="btn btn-primary mb-3" onclick="expandEncrypt()">Expand</button>
+            <button class="btn btn-secondary mb-3 ml-2" onclick="decryptText()">Unexpand</button>
+            <div class="bg-white rounded p-3" id="output-box"></div>
+            <p class="text-danger" id="error-message" style="display: none;">Incorrect decryption key. Please try again.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+<script>
+function expandEncrypt() {
+    const specialKey = document.getElementById("specialKey").value; // User-defined special key
+    const inputText = document.getElementById("inputText").value;
+    const repeatCount = parseInt(document.getElementById("repeatCount").value);
+
+    let expandedText = "";
+    for (let i = 0; i < inputText.length; i++) {
+        expandedText += inputText[i].repeat(repeatCount); // Repeat each character as specified
+    }
+
+    let encryptedData = {
+        expandedText: expandedText,
+        repeatCount: repeatCount
+    };
+
+    const encryptedText = CryptoJS.AES.encrypt(JSON.stringify(encryptedData), specialKey).toString();
+
+    document.getElementById("output-box").innerText = encryptedText;
+    document.getElementById("error-message").style.display = "none";
+}
+
+function decryptText() {
+    const specialKey = document.getElementById("specialKey").value; // User-defined special key
+    const encryptedText = document.getElementById("output-box").innerText;
+
+    try {
+        const decryptedBytes = CryptoJS.AES.decrypt(encryptedText, specialKey);
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+
+        const decryptedData = JSON.parse(decryptedText);
+
+        const repeatCount = decryptedData.repeatCount;
+        const expandedText = decryptedData.expandedText;
+
+        let originalText = "";
+        for (let i = 0; i < expandedText.length; i += repeatCount) {
+            originalText += expandedText[i];
+        }
+
+        document.getElementById("output-box").innerText = originalText;
+        document.getElementById("error-message").style.display = "none";
+    } catch (error) {
+        document.getElementById("error-message").style.display = "block";
+    }
+}
+</script>
+
+</body>
+</html>

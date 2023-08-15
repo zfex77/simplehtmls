@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Text</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .bending-textarea {
+            position: relative;
+        }
+
+        .bending-text {
+            position: absolute;
+            visibility: hidden;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 100%;
+            padding: 6px;
+            border: 1px solid transparent;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1>🖥️ One Local Page 🖥️</h1>
+    <p>Saves your text to your local storage... no one is spying on you... except you.</p>
+    <div class="mb-3 bending-textarea">
+        <label for="textArea" class="form-label">Enter your text:</label>
+        <textarea class="form-control" id="textArea" rows="4" wrap="soft"></textarea>
+        <div class="bending-text" id="bendingText"></div>
+    </div>
+    <button class="btn btn-primary" id="saveButton">Save Text</button>
+	<button class="btn btn-success" id="copyButton">Copy Text</button>
+    <button class="btn btn-danger" id="resetButton">Reset</button>
+</div>
+
+<!-- Include Bootstrap JS and your custom script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const textArea = document.getElementById("textArea");
+        const bendingText = document.getElementById("bendingText");
+        const saveButton = document.getElementById("saveButton");
+        const resetButton = document.getElementById("resetButton");
+        const copyButton = document.getElementById("copyButton");
+
+        // Load previously saved text from local storage
+        textArea.value = localStorage.getItem("savedText") || "";
+
+        // Update bending text content and textarea height
+        const updateBendingText = () => {
+            bendingText.textContent = textArea.value;
+            textArea.style.height = bendingText.clientHeight + "px";
+        };
+
+        // Initialize
+        updateBendingText();
+
+        // Save text to local storage when the button is clicked
+        saveButton.addEventListener("click", function() {
+            localStorage.setItem("savedText", textArea.value);
+            alert("Text saved successfully!");
+        });
+
+        // Reset textarea
+        resetButton.addEventListener("click", function() {
+            textArea.value = "";
+            updateBendingText();
+        });
+
+        // Copy text from textarea
+        copyButton.addEventListener("click", function() {
+            textArea.select();
+            document.execCommand("copy");
+            alert("Text copied to clipboard!");
+        });
+
+        // Update bending text when textarea content changes
+        textArea.addEventListener("input", updateBendingText);
+    });
+</script>
+</body>
+</html>

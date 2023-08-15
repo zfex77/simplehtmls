@@ -36,6 +36,8 @@
             </div>
             <button class="btn btn-primary mb-3" onclick="expandEncrypt()">Expand</button>
             <button class="btn btn-secondary mb-3 ml-2" onclick="decryptText()">Unexpand</button>
+            <button class="btn btn-success mb-3 ml-2" onclick="copyText()">Copy Text</button>
+            <button class="btn btn-danger mb-3 ml-2" onclick="resetAll()">Reset</button>
             <div class="bg-white rounded p-3" id="output-box"></div>
             <p class="text-danger" id="error-message" style="display: none;">Incorrect decryption key. Please try again.</p>
         </div>
@@ -88,6 +90,24 @@ function decryptText() {
     } catch (error) {
         document.getElementById("error-message").style.display = "block";
     }
+}
+
+function copyText() {
+    const outputText = document.getElementById("output-box");
+    const textArea = document.createElement("textarea");
+    textArea.value = outputText.innerText;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+}
+
+function resetAll() {
+    document.getElementById("inputText").value = "";
+    document.getElementById("repeatCount").value = "3";
+    document.getElementById("specialKey").value = "";
+    document.getElementById("output-box").innerText = "";
+    document.getElementById("error-message").style.display = "none";
 }
 </script>
 

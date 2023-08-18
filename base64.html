@@ -109,12 +109,13 @@
                 <div class="encryption-box">
                     <h2>Base64 Encryption/Decryption</h2>
                     <textarea id="inputText" class="form-control" rows="5" placeholder="Enter text to encrypt/decrypt"></textarea>
-                    <textarea id="outputText" class="form-control mt-3" rows="4" readonly></textarea>
+                    <textarea id="outputText" class="form-control mt-3" rows="5" readonly></textarea>
                     <div class="btn-group mt-3">
                         <button id="encryptBtn" class="btn btn-primary mr-3">Encrypt</button>
                         <button id="decryptBtn" class="btn btn-success mr-3">Decrypt</button>
-                         <button id="copyBtn" class="btn btn-secondary mr-3">Copy</button>
+					  <button id="copyBtn" class="btn btn-outline-secondary mr-3">Copy</button>
                         <button id="resetBtn" class="btn btn-outline-danger reset-btn">Reset All</button>
+
                     </div>
                 </div>
             </div>
@@ -179,6 +180,7 @@
             const outputText = document.getElementById('outputText');
             outputText.select();
             document.execCommand('copy');
+        });
 
         document.getElementById('encryptBtn').addEventListener('click', function() {
             base64EncryptDecrypt(true);

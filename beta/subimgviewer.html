@@ -2,7 +2,7 @@
 <html>
 <head>
   <link rel="icon" href="https://github.com/zfex77/simplehtmls/blob/main/logo3.png?raw=true" type="image/x-icon">
-  <title>Random Subreddit Image Viewer</title>
+  <title>Subreddit Image Fetcha'</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -26,14 +26,21 @@
 
     .randomImage {
       max-width: 100%;
-      max-height: 300px; /* Adjust the height as needed */
+      max-height: 300px;
       object-fit: contain;
+    }
+
+    .note {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <div class="container mt-4">
-    <h1 class="text-center mb-4">(⚠️ Beta 1.2) Subreddit Image Fetcha'</h1>
+    <h1 class="text-center mb-4">(⚠️ Beta 1.3) Subreddit Image Fetcha'</h1>
     <p class="text-center mb-4">
       <a href="https://www.reddit.com/r/Catsubs/wiki/index/?utm_source=reddit&utm_medium=usertext&utm_name=cats&utm_content=t5_2qhta">Cat Subreddit Wiki</a>
       and <a href="https://www.reddit.com/r/AnimalSubHub/comments/fc0b79/list_of_all_dog_subreddits/">(Incomplete) Dog Subreddit List</a>
@@ -45,26 +52,50 @@
       <button onclick="clearImages()" class="btn btn-secondary">Clear Images</button>
     </div>
     <div class="d-flex flex-wrap" id="imageGallery"></div>
+    <p class="note">Note: You may receive fewer images than requested.</p>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    const seenImages = new Set(); // Track shown image URLs
+
     function fetchRandomImages() {
       const subredditInput = document.getElementById('subredditInput').value;
       const subredditList = subredditInput.split(',').map(subreddit => subreddit.trim());
       const imageCount = parseInt(document.getElementById('imageCountInput').value, 10) || 1;
 
-      const apiUrlBase = "https://www.reddit.com/r/";
       const imageGallery = document.getElementById('imageGallery');
 
+      let imagesFetched = 0;
+      const maxAttempts = imageCount * 5;
+      let attempts = 0;
+
       const fetchImage = () => {
+        if (imagesFetched >= imageCount || attempts >= maxAttempts) return;
+        attempts++;
+
         const randomSubreddit = subredditList[Math.floor(Math.random() * subredditList.length)];
-        const apiUrl = `${apiUrlBase}${randomSubreddit}/random.json`;
+        const apiUrl = `https://www.reddit.com/r/${randomSubreddit}/hot.json?limit=25`;
 
         fetch(apiUrl)
           .then(response => response.json())
           .then(data => {
-            const imageUrl = data[0].data.children[0].data.url_overridden_by_dest;
+            const posts = data.data.children;
+            const imagePosts = posts.filter(post =>
+              post.data.url_overridden_by_dest &&
+              post.data.post_hint === "image" &&
+              !seenImages.has(post.data.url_overridden_by_dest)
+            );
+
+            if (imagePosts.length === 0) {
+              fetchImage(); // Try again if no new images
+              return;
+            }
+
+            const randomPost = imagePosts[Math.floor(Math.random() * imagePosts.length)];
+            const imageUrl = randomPost.data.url_overridden_by_dest;
+
+            seenImages.add(imageUrl); // Mark as shown
 
             const imageContainer = document.createElement('div');
             imageContainer.classList.add('image-container');
@@ -76,21 +107,23 @@
 
             imageContainer.appendChild(imageElement);
             imageGallery.appendChild(imageContainer);
+
+            imagesFetched++;
+            fetchImage(); // Continue fetching
           })
           .catch(error => {
             console.error('Error fetching image:', error);
-            alert('Error fetching image. Please check the subreddit names and try again.');
+            fetchImage(); // Retry on error
           });
       };
 
-      for (let i = 0; i < imageCount; i++) {
-        fetchImage();
-      }
+      fetchImage();
     }
 
     function clearImages() {
       const imageGallery = document.getElementById('imageGallery');
-      imageGallery.innerHTML = ''; // Clear the image gallery
+      imageGallery.innerHTML = '';
+      seenImages.clear(); // Clear the memory of shown images
     }
   </script>
 </body>

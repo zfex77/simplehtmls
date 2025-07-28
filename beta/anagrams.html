@@ -39,6 +39,12 @@
       box-shadow: 0 0 15px 5px #ffd700cc;
       transition: background-color 1.5s ease;
     }
+    .word.invalid {
+      background-color: #8b0000 !important;
+      color: #ffb6b6;
+      box-shadow: 0 0 12px 3px #ff666699;
+      transition: background-color 1.5s ease;
+    }
     .form-control {
       background-color: #1f1f1f;
       color: #ffffff;
@@ -88,8 +94,8 @@
       font-weight: bold;
     }    
     #score {
-      font-size: 1.5rem;  /* Increased font size here */
-      font-weight:;
+      font-size: 1.5rem;
+      font-weight: bold;
       margin-top: 10px;
       color: gold;
     }
@@ -107,13 +113,18 @@
       color: white;
       font-size: 1.5rem;
     }
+    #invalidWords {
+      margin-top: 15px;
+      border-top: 1px solid #333;
+      padding-top: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="loading-screen" id="loadingScreen">Loading dictionary...</div>
 
   <div class="container text-center py-5" style="display: none;" id="mainContent">
-    <h1 class="mb-4">Anagrams</h1>
+    <h1 class="mb-4">Anagrams v1.1</h1>
     <div class="letters" id="lettersDisplay">???????</div>
 
     <div class="mb-3">
@@ -123,8 +134,24 @@
     <div>
       <button class="btn btn-primary" id="submitBtn" onclick="submitWord()" disabled>Submit</button>
       <button class="btn btn-secondary" id="revealBtn" onclick="revealAnagram()">Reveal Anagram</button>
+      <button class="btn btn-danger" id="giveUpBtn" onclick="giveUp()">Give Up</button>
       <button class="btn btn-success" id="shareBtn" onclick="shareAnagram()" style="display:none;">Share Anagram</button>
+      <button class="btn btn-info" id="customBtn" onclick="showCustomAnagram()">Custom Anagram</button>
       <button class="btn btn-warning" id="newGameBtn" onclick="startNewGame()">New Game</button>
+    </div>
+
+    <!-- Custom Anagram Modal -->
+    <div id="customModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000;">
+      <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#1f1f1f; padding:30px; border-radius:10px; min-width:350px;">
+        <h4 style="color:white; margin-bottom:20px;">Create Custom Anagram</h4>
+        <input type="text" id="customWordInput" placeholder="Enter any letters..." style="width:100%; padding:10px; margin-bottom:15px; background:#2a2a2a; color:white; border:1px solid #555; border-radius:5px;" maxlength="15">
+        
+        <div style="text-align:center;">
+          <button class="btn btn-success" onclick="createCustomAnagram()">Create</button>
+          <button class="btn btn-secondary" onclick="hideCustomAnagram()">Cancel</button>
+        </div>
+        <div id="customError" style="color:#ff6b6b; margin-top:10px; text-align:center;"></div>
+      </div>
     </div>
 
     <div id="result"></div>
@@ -132,6 +159,7 @@
     <div id="timer">1:30</div>
 
     <div id="possibleWords" class="mt-4"></div>
+    <div id="invalidWords"></div>
   </div>
 
 <script>
@@ -144,6 +172,8 @@
   let timerInterval = null;
   let anagramRevealed = false;
   let possibleWords = [];
+  let giveUpActive = false;
+  let isCustomGame = false;
 
   // Streak variables
   let streakCount = 0;
@@ -212,7 +242,15 @@
       case 5: return 1200;
       case 6: return 3000;
       case 7: return 5000;
-      default: return 0;
+      case 8: return 8000;
+      case 9: return 12500;
+      case 10: return 15000;
+      case 11: return 20000;
+      case 12: return 25000;
+      case 13: return 50000;
+      case 14: return 75000;
+      case 15: return 100000;
+      default: return length > 15 ? 100000 : 0;
     }
   }
 
@@ -237,6 +275,8 @@
     streakCount = 0;
     anagramRevealed = false;
     possibleWords = [];
+    giveUpActive = false;
+    isCustomGame = false;
 
     const word = sevenLetterWords[Math.floor(Math.random() * sevenLetterWords.length)];
     baseLetters = shuffle(word);
@@ -252,6 +292,8 @@
     streakCount = 0;
     anagramRevealed = false;
     possibleWords = [];
+    giveUpActive = false;
+    isCustomGame = false;
 
     resetUIForNewGame();
   }
@@ -262,7 +304,9 @@
     document.getElementById('wordInput').disabled = true;
     document.getElementById('submitBtn').disabled = true;
     document.getElementById('revealBtn').style.display = 'inline-block';
-    document.getElementById('shareBtn').style.display = 'inline-block';
+    document.getElementById('giveUpBtn').style.display = 'none';
+    document.getElementById('shareBtn').style.display = isCustomGame ? 'none' : 'inline-block';
+    document.getElementById('customBtn').style.display = 'inline-block';
     document.getElementById('newGameBtn').disabled = false;
     document.getElementById('result').textContent = '';
     document.getElementById('score').textContent = 'Score: 0';
@@ -281,8 +325,10 @@
     document.getElementById('wordInput').disabled = false;
     document.getElementById('submitBtn').disabled = false;
     document.getElementById('revealBtn').style.display = 'none';
+    document.getElementById('giveUpBtn').style.display = 'inline-block';
     document.getElementById('shareBtn').style.display = 'none';
-    document.getElementById('newGameBtn').disabled = true;
+    document.getElementById('customBtn').style.display = 'none';
+    document.getElementById('newGameBtn').disabled = false;
 
     possibleWords = generatePossibleWords();
 
@@ -294,6 +340,55 @@
         endGame();
       }
     }, 1000);
+  }
+
+  // Give up: show all possible words without animation
+  function giveUp() {
+    if (giveUpActive || !anagramRevealed) return;
+    
+    giveUpActive = true;
+    
+    // Stop the timer
+    clearInterval(timerInterval);
+    document.getElementById('timer').textContent = formatTime(0);
+    
+    // Disable input
+    document.getElementById('wordInput').disabled = true;
+    document.getElementById('submitBtn').disabled = true;
+    
+    // Show all possible words immediately
+    showAllWords();
+    
+    document.getElementById('result').textContent = `You gave up! Here are all ${possibleWords.length} possible words.`;
+    document.getElementById('newGameBtn').disabled = false;
+    
+    // Reset give up button for next use
+    giveUpActive = false;
+  }
+  
+  // Show all possible words (used by give up and end game)
+  function showAllWords() {
+    const pwDiv = document.getElementById('possibleWords');
+    pwDiv.innerHTML = "<h5>Valid words:</h5>";
+
+    possibleWords.sort((a,b) => calculateScore(b.length) - calculateScore(a.length) || a.localeCompare(b));
+
+    for (const w of possibleWords) {
+      const span = document.createElement('span');
+      span.className = 'word';
+      if (found.includes(w)) {
+        span.style.backgroundColor = '#1f5e1f';
+        span.style.color = '#b6ffb6';
+      }
+      span.textContent = w.toUpperCase();
+
+      const scoreSpan = document.createElement('span');
+      scoreSpan.className = 'score';
+      scoreSpan.textContent = `+${calculateScore(w.length)}`;
+
+      pwDiv.appendChild(span);
+      pwDiv.appendChild(scoreSpan);
+    }
   }
 
   // Format seconds to MM:SS
@@ -310,6 +405,7 @@
 
     if (!word) return;
 
+    // Check if already found
     if (found.includes(word)) {
       setResult(`You already found "${word.toUpperCase()}"`);
       resetStreak();
@@ -324,13 +420,7 @@
       return;
     }
 
-    if (!dictionary.has(word)) {
-      setResult(`"${word.toUpperCase()}" is not a valid English word.`);
-      resetStreak();
-      input.value = '';
-      return;
-    }
-
+    // Check if can be made from letters first
     if (!canMakeWord(word, baseLetters)) {
       setResult(`"${word.toUpperCase()}" cannot be made from the anagram letters.`);
       resetStreak();
@@ -338,9 +428,19 @@
       return;
     }
 
+    // Now check if it's a valid dictionary word
+    if (!dictionary.has(word)) {
+      setResult(`"${word.toUpperCase()}" cannot be made from the anagram letters.`);
+      resetStreak();
+      input.value = '';
+      return;
+    }
+
+    // Valid word - award points
     found.push(word);
 
     streakCount++;
+    
     let streakMultiplier = 1;
     if (streakCount >= 4) {
       streakMultiplier = Math.pow(1.10, streakCount - 3);
@@ -371,28 +471,16 @@
   function addFoundWord(word, streaking) {
     const pwDiv = document.getElementById('possibleWords');
 
-    // Find existing span for the word, or create new
-    let existingSpan = null;
-    for (const child of pwDiv.children) {
-      if (child.tagName === 'SPAN' && child.textContent.toLowerCase() === word.toLowerCase()) {
-        existingSpan = child;
-        break;
-      }
-    }
-
     // If no word list shown yet, create container and header
     if (pwDiv.innerHTML === '') {
-      pwDiv.innerHTML = "<h5>All possible words:</h5>";
+      pwDiv.innerHTML = "<h5>Valid words found:</h5>";
     }
 
-    // Create a new span for found word with score next to it
-    // We'll recreate the entire list after game ends so no need to worry here.
     const span = document.createElement('span');
     span.classList.add('word', 'found');
     span.textContent = word.toUpperCase();
 
     if (streaking) {
-      span.classList.remove('found');
       span.classList.add('streak');
     }
 
@@ -411,6 +499,33 @@
     pwDiv.appendChild(scoreSpan);
   }
 
+  // Add invalid word to list
+  function addInvalidWord(word) {
+    const iwDiv = document.getElementById('invalidWords');
+
+    // If no invalid word list shown yet, create container and header
+    if (iwDiv.innerHTML === '') {
+      iwDiv.innerHTML = "<h5>Invalid words you tried:</h5>";
+    }
+
+    const span = document.createElement('span');
+    span.classList.add('word', 'invalid');
+    span.textContent = word.toUpperCase();
+
+    // Animate glow: add class and remove after 1.5s
+    setTimeout(() => {
+      span.style.transition = "box-shadow 1.5s ease, background-color 1.5s ease";
+      span.classList.remove('invalid');
+    }, 1500);
+
+    const noteSpan = document.createElement('span');
+    noteSpan.className = 'invalid-word';
+    noteSpan.textContent = " (not a word)";
+
+    iwDiv.appendChild(span);
+    iwDiv.appendChild(noteSpan);
+  }
+
   // Display result text
   function setResult(text) {
     const res = document.getElementById('result');
@@ -422,34 +537,13 @@
     document.getElementById('wordInput').disabled = true;
     document.getElementById('submitBtn').disabled = true;
     document.getElementById('result').textContent = "Time's up!";
-
-    const pwDiv = document.getElementById('possibleWords');
-    pwDiv.innerHTML = "<h5>All possible words:</h5>";
-
-    possibleWords.sort((a,b) => calculateScore(b.length) - calculateScore(a.length) || a.localeCompare(b));
-
-    for (const w of possibleWords) {
-      const span = document.createElement('span');
-      span.className = 'word';
-      if (found.includes(w)) {
-        span.style.backgroundColor = '#1f5e1f';
-        span.style.color = '#b6ffb6';
-      }
-      span.textContent = w.toUpperCase();
-
-      const scoreSpan = document.createElement('span');
-      scoreSpan.className = 'score';
-      scoreSpan.textContent = `+${calculateScore(w.length)}`;
-
-      pwDiv.appendChild(span);
-      pwDiv.appendChild(scoreSpan);
-    }
+    showAllWords();
     document.getElementById('newGameBtn').disabled = false;
   }
 
   // Share the shuffled anagram letters (base64 encode) in URL
   function shareAnagram() {
-    if (!baseLetters) return;
+    if (!baseLetters || isCustomGame) return;
     const encoded = btoa(baseLetters);
     const url = `${window.location.origin}${window.location.pathname}?a=${encoded}`;
     navigator.clipboard.writeText(url).then(() => {
@@ -459,11 +553,65 @@
     });
   }
 
+  // Show custom anagram modal
+  function showCustomAnagram() {
+    document.getElementById('customModal').style.display = 'block';
+    document.getElementById('customWordInput').value = '';
+    document.getElementById('customError').textContent = '';
+    document.getElementById('customWordInput').focus();
+  }
+
+  // Hide custom anagram modal
+  function hideCustomAnagram() {
+    document.getElementById('customModal').style.display = 'none';
+  }
+
+  // Create custom anagram from user input
+  function createCustomAnagram() {
+    const input = document.getElementById('customWordInput').value.trim().toLowerCase();
+    const errorDiv = document.getElementById('customError');
+    
+    if (input.length < 2) {
+      errorDiv.textContent = 'Please enter at least 2 letters.';
+      return;
+    }
+    
+    if (!/^[a-z]+$/.test(input)) {
+      errorDiv.textContent = 'Please use only letters A-Z.';
+      return;
+    }
+    
+    // Start custom game
+    clearInterval(timerInterval);
+    found = [];
+    score = 0;
+    timeLeft = 90;
+    streakCount = 0;
+    anagramRevealed = false;
+    possibleWords = [];
+    giveUpActive = false;
+    isCustomGame = true;
+    
+    baseLetters = shuffle(input);
+    resetUIForNewGame();
+    hideCustomAnagram();
+  }
+
   window.onload = () => {
     loadDictionary();
 
     document.getElementById('wordInput').addEventListener('keydown', e => {
       if (e.key === 'Enter') submitWord();
+    });
+
+    document.getElementById('customWordInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') createCustomAnagram();
+      if (e.key === 'Escape') hideCustomAnagram();
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('customModal').addEventListener('click', e => {
+      if (e.target.id === 'customModal') hideCustomAnagram();
     });
   };
 </script>

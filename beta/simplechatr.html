@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Chat — iMessage Style</title>
+  <link rel="icon" href="https://github.com/zfex77/simplehtmls/blob/main/src/logo3.png?raw=true" type="image/x-icon" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
+  <style>
+    :root{
+      --bg:#eef0f4;
+      --panel:#ffffff;
+      --muted:#6b7280;
+      --text:#0b0f17;
+      --me:#0a84ff;         /* iMessage blue for me */
+      --other:#e5e5ea;      /* iMessage gray for others */
+      --otherText:#111;     /* dark text on gray bubble (light theme) */
+      --shadow:0 8px 24px rgba(0,0,0,.08);
+      --inputBorder: rgba(0,0,0,.08);
+    }
+    [data-theme="dark"]{
+      --bg:#0d1117;
+      --panel:#0b0f14;
+      --muted:#cfd8e3;      /* lighter muted for contrast */
+      --text:#ffffff;       /* ALL text goes white in dark */
+      --me:#0a84ff;
+      --other:#2a2f39;      /* darker gray bubble */
+      --otherText:#ffffff;  /* white text inside gray bubble (dark) */
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --inputBorder: rgba(255,255,255,.18);
+    }
+
+    html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+    .app{display:grid;grid-template-columns:280px 1fr;gap:16px;height:100vh;padding:16px;box-sizing:border-box;}
+
+    .sidebar{background:var(--panel);border-radius:22px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
+    .brand{display:flex;align-items:center;gap:10px;padding:6px 8px}
+    .brand img{width:34px;height:34px;border-radius:9px}
+    .brand .title{font-weight:800;letter-spacing:.2px}
+    .brand .subtitle{font-size:12px;color:var(--muted)}
+    .search{margin:12px 8px}
+    .search input{width:100%;border-radius:14px;border:1px solid var(--inputBorder);background:transparent;padding:8px 12px;color:var(--text)}
+    .channels{overflow:auto;padding-right:4px}
+    .channel{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:14px;cursor:pointer;color:var(--text)}
+    .channel:hover{background:rgba(0,0,0,.05)}
+    [data-theme="dark"] .channel:hover{background:rgba(255,255,255,.06)}
+    .channel.active{background:linear-gradient(180deg,rgba(0,0,0,.05),transparent);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+    [data-theme="dark"] .channel.active{background:linear-gradient(180deg,rgba(255,255,255,.08),transparent);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+    .ch-name{font-weight:700}
+    .chip{font-size:11px;color:var(--muted)}
+    .add-area{display:flex;gap:8px;padding:8px}
+    .add-area .btn{border-radius:12px}
+
+    .main{background:var(--panel);border-radius:22px;box-shadow:var(--shadow);display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;min-width:0}
+
+    .header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.06)}
+    .hdr-title{font-weight:800}
+    .hdr-sub{font-size:12px;color:var(--muted)}
+    .switch{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+    .switch input{display:none}
+    .thumb{width:44px;height:24px;border-radius:999px;background:rgba(0,0,0,.1);position:relative;transition:.2s}
+    [data-theme="dark"] .thumb{background:rgba(255,255,255,.2)}
+    .dot{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--panel);transition:transform .2s}
+    input:checked + .thumb .dot{transform:translateX(20px)}
+
+    .messages{overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,rgba(127,127,127,.06),transparent 160px)}
+    .row{display:flex;flex-direction:column;gap:4px;max-width:72%}
+    .row.me{margin-left:auto;align-items:flex-end}
+    .row.other{align-items:flex-start}
+    .uname{font-size:11px;color:var(--muted);margin:0 6px}
+    .bubble{border-radius:18px;padding:10px 14px;line-height:1.35;position:relative;animation:slideIn .12s ease;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+    .bubble.me{background:var(--me);color:#fff}
+    .bubble.other{background:var(--other);color:var(--otherText)}
+    .bubble.neutral{background:var(--other);color:var(--otherText)}
+    .bubble img{max-width:280px;border-radius:14px;display:block}
+    .meta{margin:0 6px;font-size:11px;color:var(--muted)}
+    .pending{opacity:.7;filter:grayscale(8%)}
+    .failed{outline:2px solid #ff6b6b}
+    @keyframes slideIn{from{transform:translateY(4px);opacity:.0}to{transform:translateY(0);opacity:1}}
+
+    .composer{display:flex;gap:8px;padding:14px;border-top:1px solid rgba(0,0,0,.06)}
+    .composer input[type="text"]{flex:1;border-radius:20px;padding:12px 14px;border:1px solid var(--inputBorder);background:transparent;color:var(--text)}
+    .icon-btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--inputBorder);background:transparent;border-radius:16px;padding:10px 12px;cursor:pointer}
+    .icon-btn svg{width:18px;height:18px;display:block}
+    .send-btn{background:var(--me);border-color:var(--me)}
+    .send-btn svg{fill:#fff}
+
+    .modal-veil{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.55);z-index:50}
+    .modal-card{background:var(--panel);color:var(--text);padding:18px;width:440px;max-width:92vw;border-radius:14px;box-shadow:var(--shadow)}
+
+    @media (max-width:900px){
+      .app{grid-template-columns:1fr;grid-template-rows:240px 1fr}
+      .sidebar{order:1}
+      .main{order:2}
+      .row{max-width:88%}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app" data-theme="light">
+    <div class="sidebar">
+      <div class="brand">
+        <img src="https://github.com/zfex77/simplehtmls/blob/main/src/logo3.png?raw=true" alt="logo" />
+        <div>
+          <div class="title">Simple Chat</div>
+          <div class="subtitle">iMessage-style</div>
+        </div>
+      </div>
+      <div class="search"><input id="search" placeholder="Search channels" /></div>
+      <div class="add-area">
+        <button id="new-channel" class="btn btn-sm btn-primary">+ New</button>
+      </div>
+      <div class="channels" id="channels"></div>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <div>
+          <div class="hdr-title" id="header-title">#simple-chat-channel</div>
+          <div class="hdr-sub" id="header-sub">Public</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="hdr-sub">Signed in as <strong id="signed-name">(guest)</strong> · <span id="change-name" style="cursor:pointer; text-decoration: underline;">change</span></div>
+          <label class="switch" title="Light / Dark">
+            <input id="theme-toggle" type="checkbox" />
+            <div class="thumb"><div class="dot"></div></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="messages" id="messages"></div>
+
+      <div class="composer">
+        <input id="input" type="text" placeholder="iMessage vibes — press Enter" />
+        <input id="file" type="file" accept="image/*" multiple style="display:none" />
+        <button id="attach" class="icon-btn" title="Attach image" aria-label="Attach image">📎</button>
+        <button id="send" class="icon-btn send-btn" title="Send" aria-label="Send">
+          <!-- arrow icon -->
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21l20-9L2 3v7l14 2-14 2v7z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Username Modal -->
+  <div id="name-modal" class="modal-veil">
+    <div class="modal-card">
+      <h5>Set your display name</h5>
+      <p style="color:var(--muted);margin-bottom:10px">This is how people will see you.</p>
+      <input id="name-input" class="form-control" placeholder="Type a name..." />
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button id="name-cancel" class="btn btn-outline-secondary">Cancel</button>
+        <button id="name-save" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== CONFIG ===== */
+    const publishKey   = 'pub-c-681d632c-989f-4a2d-9076-e70e1ea2c214';
+    const subscribeKey = 'sub-c-1e31862d-744e-4817-a27c-1d0a6b73080a';
+    const DEFAULT_CHANNEL = 'simple-chat-channel';
+
+    /* ===== STORAGE KEYS ===== */
+    const LS_UUID = 'sc-uuid';
+    const LS_NAME = 'sc-name';
+    const LS_THEME = 'sc-theme';
+    const LS_CHANNELS = 'sc-channels';
+    const LS_HISTORY_PREFIX = 'sc-history:'; // per-channel
+    const UA_UPLOAD = 'SimpleChat/1.0 (0x0.st client)';
+
+    /* ===== STABLE UUID ===== */
+    let myUUID = localStorage.getItem(LS_UUID);
+    if (!myUUID) { myUUID = 'u_' + Math.random().toString(36).slice(2, 10); localStorage.setItem(LS_UUID, myUUID); }
+
+    const pubnub = new PubNub({ publishKey, subscribeKey, uuid: myUUID });
+
+    /* ===== ELEMENTS ===== */
+    const app = document.getElementById('app');
+    const chList = document.getElementById('channels');
+    const search = document.getElementById('search');
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    const attachBtn = document.getElementById('attach');
+    const fileInput = document.getElementById('file');
+    const hdrTitle = document.getElementById('header-title');
+    const hdrSub = document.getElementById('header-sub');
+    const signedName = document.getElementById('signed-name');
+    const changeName = document.getElementById('change-name');
+    const modal = document.getElementById('name-modal');
+    const nameInput = document.getElementById('name-input');
+    const nameSave = document.getElementById('name-save');
+    const nameCancel = document.getElementById('name-cancel');
+    const themeToggle = document.getElementById('theme-toggle');
+    const newChannelBtn = document.getElementById('new-channel');
+
+    /* ===== STATE ===== */
+    let currentChannel = DEFAULT_CHANNEL;
+    let displayName = localStorage.getItem(LS_NAME) || 'Me';
+    let lastSendAt = 0;
+    const sentMids = new Set();
+
+    function lsHistoryKey(ch){ return LS_HISTORY_PREFIX + ch; }
+    function loadLocalHistory(ch){ try { return JSON.parse(localStorage.getItem(lsHistoryKey(ch)) || '[]'); } catch(e){ return []; } }
+    function saveLocalHistory(ch, arr){ localStorage.setItem(lsHistoryKey(ch), JSON.stringify(arr.slice(-300))); }
+    function pushLocal(ch, msg){ const h = loadLocalHistory(ch); h.push(msg); saveLocalHistory(ch, h); }
+
+    /* ===== THEME ===== */
+    function initTheme(){
+      const saved = localStorage.getItem(LS_THEME);
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const dark = saved ? (saved === 'dark') : prefersDark;
+      app.setAttribute('data-theme', dark ? 'dark' : 'light');
+      themeToggle.checked = dark;
+    }
+    themeToggle.addEventListener('change', ()=>{
+      const dark = themeToggle.checked;
+      app.setAttribute('data-theme', dark ? 'dark' : 'light');
+      localStorage.setItem(LS_THEME, dark ? 'dark' : 'light');
+    });
+
+    /* ===== CHANNELS ===== */
+    function getChannels(){ try { return JSON.parse(localStorage.getItem(LS_CHANNELS) || '[]'); } catch(e){ return []; } }
+    function setChannels(list){ localStorage.setItem(LS_CHANNELS, JSON.stringify(list)); }
+    function ensureDefaultChannel(list){ if(!list.includes(DEFAULT_CHANNEL)) list.push(DEFAULT_CHANNEL); return list; }
+
+    function drawChannels(filter=''){
+      chList.innerHTML = '';
+      const all = ensureDefaultChannel(getChannels());
+      all.filter(c=> c.includes(filter)).forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'channel' + (c===currentChannel ? ' active' : '');
+        row.innerHTML = `<div><span class="ch-name">#${c}</span></div><div class="chip">›</div>`;
+        row.addEventListener('click', ()=> switchChannel(c));
+        chList.appendChild(row);
+      });
+    }
+
+    function addChannel(name){
+      const list = getChannels();
+      if(!list.includes(name)){ list.unshift(name); setChannels(list); }
+      drawChannels(search.value.trim());
+    }
+
+    function switchChannel(name){
+      if(currentChannel === name) return;
+      currentChannel = name;
+      hdrTitle.textContent = '#' + name; hdrSub.textContent = (name===DEFAULT_CHANNEL?'Public':'Custom');
+      try{ pubnub.unsubscribeAll(); }catch(e){}
+      pubnub.subscribe({ channels: [name] });
+      renderHistory(name);
+      const url = new URL(window.location.href); url.searchParams.set('channel', name); history.replaceState({}, '', url);
+      drawChannels(search.value.trim());
+    }
+
+    search.addEventListener('input', ()=> drawChannels(search.value.trim()));
+    newChannelBtn.addEventListener('click', ()=>{
+      const name = 'chan-' + Math.random().toString(36).slice(2,7);
+      addChannel(name); switchChannel(name);
+      alert('Created #' + name + '. Share the URL to invite others.');
+    });
+
+    /* ===== USERNAME ===== */
+    function openNameModal(){ modal.style.display = 'flex'; nameInput.value = displayName; nameInput.focus(); }
+    function closeNameModal(){ modal.style.display = 'none'; }
+    function setName(v){ displayName = v || 'Me'; localStorage.setItem(LS_NAME, displayName); signedName.textContent = displayName; }
+    changeName.addEventListener('click', openNameModal);
+    nameCancel.addEventListener('click', closeNameModal);
+    nameSave.addEventListener('click', ()=>{
+      const v = nameInput.value.trim();
+      if(!v) return alert('Enter a name'); setName(v); closeNameModal();
+    });
+
+    /* ===== RENDER ===== */
+    function fmtTime(ts){ try{ const d = new Date(ts || Date.now()); return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});}catch(_){return '';} }
+
+    function renderOne(msg, isLocal=false){
+      const mine = (msg.uuid === myUUID) || isLocal;
+      const whoClass = mine ? 'me' : 'other';
+
+      const wrap = document.createElement('div');
+      wrap.className = `row ${whoClass}`;
+
+      // Username above bubble
+      const uname = document.createElement('div');
+      uname.className = 'uname';
+      uname.textContent = (msg.username || (mine?'You':'User'));
+      wrap.appendChild(uname);
+
+      const bubble = document.createElement('div');
+      bubble.className = `bubble ${mine ? 'me':'other'}`;
+
+      if(msg.type === 'image' && msg.url){
+        bubble.innerHTML = `<img src="${msg.url}" alt="image" />`;
+      } else if(msg.type === 'image' && msg.data){
+        bubble.innerHTML = `<img src="${msg.data}" alt="image" />`;
+      } else {
+        bubble.textContent = (msg.text || '');
+      }
+
+      if(isLocal || msg._pending) bubble.classList.add('pending');
+      if(msg.failed) bubble.classList.add('failed');
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = fmtTime(msg.ts);
+
+      wrap.appendChild(bubble);
+      wrap.appendChild(meta);
+      messages.appendChild(wrap);
+      messages.scrollTop = messages.scrollHeight;
+
+      return wrap;
+    }
+
+    function renderHistory(ch){
+      messages.innerHTML = '';
+      const local = loadLocalHistory(ch);
+      local.forEach(m => renderOne(m));
+      pubnub.fetchMessages({ channels: [ch], count: 50 }).then(res => {
+        const list = (res.channels && res.channels[ch]) || [];
+        const serverMsgs = list.map(i => ({ ...(i.message||{}), ts: (i.message && i.message.ts) || Date.now() }));
+        const map = new Map();
+        [...local, ...serverMsgs].forEach(m => { const key = m.mid || ('t:' + (m.ts||0)); map.set(key, m); });
+        const merged = [...map.values()].sort((a,b)=>(a.ts||0)-(b.ts||0));
+        saveLocalHistory(ch, merged);
+        messages.innerHTML=''; merged.forEach(m => renderOne(m));
+      }).catch(err => console.warn('history fetch failed', err));
+    }
+
+    /* ===== SEND TEXT (dedup + cooldown) ===== */
+    let lastSentDomPending = null;
+    function sendText(text){
+      if(!text) return;
+      const now = Date.now();
+      if(now - lastSendAt < 250) return; // avoid double send
+      lastSendAt = now;
+
+      const mid = 'm_' + Math.random().toString(36).slice(2,10);
+      const msg = { mid, text, username: displayName, uuid: myUUID, ts: now };
+
+      sentMids.add(mid);
+      msg._pending = true;
+      lastSentDomPending = renderOne(msg, true);
+      pushLocal(currentChannel, {...msg});
+
+      pubnub.publish({ channel: currentChannel, message: msg })
+        .then(() => markDelivered(mid))
+        .catch(() => markFailed(mid));
+    }
+
+    function markDelivered(mid){
+      const h = loadLocalHistory(currentChannel).map(m => (m.mid===mid? ({...m, _pending:false}):m));
+      saveLocalHistory(currentChannel, h);
+      if(lastSentDomPending){
+        const bub = lastSentDomPending.querySelector('.bubble.pending');
+        if(bub) bub.classList.remove('pending');
+      }
+    }
+    function markFailed(mid){
+      const h = loadLocalHistory(currentChannel).map(m => (m.mid===mid? ({...m, _pending:false, failed:true}):m));
+      saveLocalHistory(currentChannel, h);
+      if(lastSentDomPending){
+        const bub = lastSentDomPending.querySelector('.bubble.pending');
+        if(bub){ bub.classList.remove('pending'); bub.classList.add('failed'); }
+      }
+    }
+
+    sendBtn.addEventListener('click', ()=>{
+      const t = input.value.trim(); if(!t) return;
+      input.value=''; sendText(t);
+    });
+    input.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); }
+    });
+
+    /* ===== IMAGE UPLOADS (0x0.st with fallback) ===== */
+    attachBtn.addEventListener('click', ()=> fileInput.click());
+    fileInput.addEventListener('change', async (ev)=>{
+      const files = Array.from(ev.target.files||[]).filter(f=>/^image\//.test(f.type));
+      if(files.length===0) return;
+      for(const f of files){
+        // 1) Optimistic local preview
+        const dataUrl = await readAsDataURL(f);
+        const mid = 'm_' + Math.random().toString(36).slice(2,10);
+        const localMsg = { mid, type:'image', data:dataUrl, name:f.name, username:displayName, uuid:myUUID, ts:Date.now(), _pending:true };
+        sentMids.add(mid);
+        lastSentDomPending = renderOne(localMsg, true);
+        pushLocal(currentChannel, {...localMsg});
+
+        // 2) Try uploading to 0x0.st in background
+        try{
+          const url = await uploadTo0x0(f);
+          // publish the hosted URL as the canonical message (same mid so other clients dedup)
+          const hostedMsg = { mid, type:'image', url, name:f.name, username:displayName, uuid:myUUID, ts:Date.now() };
+          pubnub.publish({ channel: currentChannel, message: hostedMsg }).then(()=>{
+            // swap local history entry to use url instead of data
+            const h = loadLocalHistory(currentChannel).map(m => (m.mid===mid ? ({...hostedMsg}) : m));
+            saveLocalHistory(currentChannel, h);
+            // update DOM bubble
+            if(lastSentDomPending){
+              const bub = lastSentDomPending.querySelector('.bubble');
+              if(bub){ bub.classList.remove('pending'); bub.innerHTML = `<img src="${url}" alt="image" />`; }
+            }
+          }).catch(()=> markFailed(mid));
+        }catch(err){
+          // CORS or network blocked — keep local preview but mark delivered so it doesn't look stuck
+          markDelivered(mid);
+          console.warn('0x0.st upload failed or blocked:', err);
+        }
+      }
+      fileInput.value='';
+    });
+
+    function readAsDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const fr = new FileReader();
+        fr.onload = ()=> resolve(fr.result);
+        fr.onerror = reject;
+        fr.readAsDataURL(file);
+      });
+    }
+
+    async function uploadTo0x0(file){
+      // 0x0.st expects multipart/form-data with a "file" field.
+      // Important: 0x0.st is primarily CLI-oriented; browsers may be blocked by CORS.
+      const form = new FormData();
+      form.append('file', file, file.name);
+      const res = await fetch('https://0x0.st', {
+        method:'POST',
+        body:form,
+        headers:{ 'X-Requested-With': UA_UPLOAD } // friendly UA header
+      });
+      if(!res.ok) throw new Error('Upload HTTP ' + res.status);
+      const text = await res.text();
+      const url = (text||'').trim();
+      if(!/^https?:\/\/0x0\.st\//.test(url)) throw new Error('Unexpected response: ' + url);
+      return url;
+    }
+
+    /* ===== RECEIVING (skip duplicates) ===== */
+    pubnub.addListener({
+      message: function(ev){
+        const msg = ev.message || {};
+        if(msg.mid && sentMids.has(msg.mid)){
+          sentMids.delete(msg.mid);
+          // Update delivered & DOM
+          const h = loadLocalHistory(currentChannel).map(m => (m.mid===msg.mid ? ({...m, _pending:false}) : m));
+          saveLocalHistory(currentChannel, h);
+          const pendingBubble = messages.querySelector('.row.me .bubble.pending');
+          if(pendingBubble) pendingBubble.classList.remove('pending');
+          // If hosted URL arrived for an image, ensure DOM shows it
+          if(msg.type==='image' && msg.url){
+            const lastMe = messages.querySelector('.row.me:last-child .bubble');
+            if(lastMe) lastMe.innerHTML = `<img src="${msg.url}" alt="image" />`;
+          }
+          return;
+        }
+        // Store & render incoming
+        pushLocal(currentChannel, msg);
+        renderOne(msg);
+      }
+    });
+
+    /* ===== INIT ===== */
+    function boot(){
+      initTheme();
+      setName(displayName);
+      const params = new URLSearchParams(location.search);
+      const fromURL = params.get('channel');
+      if(fromURL){ currentChannel = fromURL; }
+      hdrTitle.textContent = '#' + currentChannel;
+      addChannel(DEFAULT_CHANNEL); addChannel(currentChannel);
+      drawChannels();
+      pubnub.subscribe({ channels: [currentChannel] });
+      renderHistory(currentChannel);
+    }
+    boot();
+  </script>
+</body>
+</html>

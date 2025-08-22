@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simple Chat — iMessage Style</title>
+  <title>SimpleChat</title>
   <link rel="icon" href="https://github.com/zfex77/simplehtmls/blob/main/src/logo3.png?raw=true" type="image/x-icon" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
   <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
   <style>
     :root{
-      --bg:#eef0f4;
+      --bg:#0c101a;
       --panel:#ffffff;
       --muted:#6b7280;
       --text:#0b0f17;
@@ -18,6 +18,8 @@
       --otherText:#111;     /* dark text on gray bubble (light theme) */
       --shadow:0 8px 24px rgba(0,0,0,.08);
       --inputBorder: rgba(0,0,0,.08);
+      --titleColor:#000;
+      --channelColor:#000;
     }
     [data-theme="dark"]{
       --bg:#0d1117;
@@ -29,6 +31,8 @@
       --otherText:#ffffff;  /* white text inside gray bubble (dark) */
       --shadow:0 10px 30px rgba(0,0,0,.35);
       --inputBorder: rgba(255,255,255,.18);
+      --titleColor:#fff;  
+      --channelColor:#fff;
     }
 
     html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
@@ -37,7 +41,7 @@
     .sidebar{background:var(--panel);border-radius:22px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
     .brand{display:flex;align-items:center;gap:10px;padding:6px 8px}
     .brand img{width:34px;height:34px;border-radius:9px}
-    .brand .title{font-weight:800;letter-spacing:.2px}
+    .brand .title{font-weight:800;letter-spacing:.2px;color:var(--titleColor);} 
     .brand .subtitle{font-size:12px;color:var(--muted)}
     .search{margin:12px 8px}
     .search input{width:100%;border-radius:14px;border:1px solid var(--inputBorder);background:transparent;padding:8px 12px;color:var(--text)}
@@ -47,7 +51,7 @@
     [data-theme="dark"] .channel:hover{background:rgba(255,255,255,.06)}
     .channel.active{background:linear-gradient(180deg,rgba(0,0,0,.05),transparent);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
     [data-theme="dark"] .channel.active{background:linear-gradient(180deg,rgba(255,255,255,.08),transparent);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-    .ch-name{font-weight:700}
+    .ch-name{font-weight:700;color:var(--channelColor);}
     .chip{font-size:11px;color:var(--muted)}
     .add-area{display:flex;gap:8px;padding:8px}
     .add-area .btn{border-radius:12px}
@@ -55,7 +59,7 @@
     .main{background:var(--panel);border-radius:22px;box-shadow:var(--shadow);display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;min-width:0}
 
     .header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.06)}
-    .hdr-title{font-weight:800}
+    .hdr-title{font-weight:800;color:var(--channelColor);}
     .hdr-sub{font-size:12px;color:var(--muted)}
     .switch{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
     .switch input{display:none}
@@ -103,7 +107,7 @@
       <div class="brand">
         <img src="https://github.com/zfex77/simplehtmls/blob/main/src/logo3.png?raw=true" alt="logo" />
         <div>
-          <div class="title">Simple Chat</div>
+          <div class="title">SimpleChat</div>
           <div class="subtitle">iMessage-style</div>
         </div>
       </div>

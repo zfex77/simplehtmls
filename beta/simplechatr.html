@@ -93,11 +93,51 @@
     .modal-veil{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.55);z-index:50}
     .modal-card{background:var(--panel);color:var(--text);padding:18px;width:440px;max-width:92vw;border-radius:14px;box-shadow:var(--shadow)}
 
+    .load-more{text-align:center;padding:10px;margin-bottom:10px}
+    .load-more button{background:transparent;border:1px solid var(--inputBorder);color:var(--muted);padding:6px 12px;border-radius:12px;cursor:pointer;font-size:12px}
+    .load-more button:hover{background:rgba(0,0,0,.05)}
+    [data-theme="dark"] .load-more button:hover{background:rgba(255,255,255,.06)}
+
     @media (max-width:900px){
       .app{grid-template-columns:1fr;grid-template-rows:240px 1fr}
       .sidebar{order:1}
       .main{order:2}
       .row{max-width:88%}
+      
+      /* Mobile composer fixes */
+      .composer{padding:12px;gap:6px}
+      .composer input[type="text"]{
+        flex:1;
+        min-width:0; /* Prevents overflow */
+        border-radius:20px;
+        padding:10px 12px;
+        font-size:16px; /* Prevents zoom on iOS */
+        -webkit-appearance:none; /* Remove iOS styling */
+        appearance:none;
+      }
+      .icon-btn{
+        padding:8px 10px;
+        flex-shrink:0; /* Prevents buttons from shrinking */
+      }
+      
+      /* Better mobile keyboard handling */
+      .main{
+        position:relative;
+        min-height:0;
+      }
+      .messages{
+        padding-bottom:env(keyboard-inset-height, 0px); /* iOS keyboard safe area */
+        -webkit-overflow-scrolling:touch; /* Smooth scrolling on iOS */
+      }
+    }
+    
+    /* iOS specific fixes */
+    @supports (-webkit-touch-callout: none) {
+      .composer input[type="text"]{
+        font-size:16px !important; /* Prevents zoom on iOS */
+        -webkit-appearance:none;
+        -webkit-border-radius:20px;
+      }
     }
   </style>
 </head>
@@ -111,11 +151,15 @@
           <div class="subtitle">by zfex77</div>
         </div>
       </div>
-      <div class="search"><input id="search" placeholder="Search channels" /></div>
       <div class="add-area">
-        <button id="new-channel" class="btn btn-sm btn-primary">+ New</button>
+        <div style="display:flex;gap:8px;width:100%">
+          <select id="channel-dropdown" class="form-control" style="flex:1;border-radius:12px;border:1px solid var(--inputBorder);background:var(--panel);color:var(--text)">
+            <option value="">Select Channel</option>
+          </select>
+          <button id="new-channel" class="btn btn-sm btn-primary" style="width:36px;padding:4px">+</button>
+          <button id="share-channel" class="btn btn-sm btn-outline-secondary" style="width:36px;padding:4px" title="Share Channel">📤</button>
+        </div>
       </div>
-      <div class="channels" id="channels"></div>
     </div>
 
     <div class="main">
@@ -133,12 +177,14 @@
         </div>
       </div>
 
-      <div class="messages" id="messages"></div>
+      <div class="messages" id="messages">
+        <div class="load-more" id="load-more" style="display:none">
+          <button onclick="loadMoreHistory()">Load older messages</button>
+        </div>
+      </div>
 
       <div class="composer">
-        <input id="input" type="text" placeholder="iMessage vibes — press Enter" />
-        <input id="file" type="file" accept="image/*" multiple style="display:none" />
-        <button id="attach" class="icon-btn" title="Attach image" aria-label="Attach image">📎</button>
+        <input id="input" type="text" placeholder="Type a message..." />
         <button id="send" class="icon-btn send-btn" title="Send" aria-label="Send">
           <!-- arrow icon -->
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21l20-9L2 3v7l14 2-14 2v7z"/></svg>
@@ -147,12 +193,24 @@
     </div>
   </div>
 
+  <!-- Channel Name Modal -->
+  <div id="channel-modal" class="modal-veil">
+    <div class="modal-card">
+      <h5 style="color:var(--titleColor)">Create New Channel</h5>
+      <p style="color:var(--muted);margin-bottom:10px">Choose a name for your channel.</p>
+      <input id="channel-input" class="form-control" placeholder="Enter channel name..." style="font-size:16px;background:var(--panel);color:var(--text);border:1px solid var(--inputBorder)" />
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button id="channel-cancel" class="btn btn-outline-secondary">Cancel</button>
+        <button id="channel-save" class="btn btn-primary">Create</button>
+      </div>
+    </div>
+  </div>
   <!-- Username Modal -->
   <div id="name-modal" class="modal-veil">
     <div class="modal-card">
-      <h5>Set your display name</h5>
+      <h5 style="color:var(--titleColor)">Set your display name</h5>
       <p style="color:var(--muted);margin-bottom:10px">This is how people will see you.</p>
-      <input id="name-input" class="form-control" placeholder="Type a name..." />
+      <input id="name-input" class="form-control" placeholder="Type a name..." style="font-size:16px;background:var(--panel);color:var(--text);border:1px solid var(--inputBorder)" />
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
         <button id="name-cancel" class="btn btn-outline-secondary">Cancel</button>
         <button id="name-save" class="btn btn-primary">Save</button>
@@ -164,7 +222,7 @@
     /* ===== CONFIG ===== */
     const publishKey   = 'pub-c-681d632c-989f-4a2d-9076-e70e1ea2c214';
     const subscribeKey = 'sub-c-1e31862d-744e-4817-a27c-1d0a6b73080a';
-    const DEFAULT_CHANNEL = 'simple-chat-channel';
+    const DEFAULT_CHANNEL = 'scc';
 
     /* ===== STORAGE KEYS ===== */
     const LS_UUID = 'sc-uuid';
@@ -172,6 +230,7 @@
     const LS_THEME = 'sc-theme';
     const LS_CHANNELS = 'sc-channels';
     const LS_HISTORY_PREFIX = 'sc-history:'; // per-channel
+    const LS_OLDEST_TOKEN_PREFIX = 'sc-oldest:'; // track oldest loaded timetoken per channel
     const UA_UPLOAD = 'SimpleChat/1.0 (0x0.st client)';
 
     /* ===== STABLE UUID ===== */
@@ -182,9 +241,9 @@
 
     /* ===== ELEMENTS ===== */
     const app = document.getElementById('app');
-    const chList = document.getElementById('channels');
-    const search = document.getElementById('search');
+    const channelDropdown = document.getElementById('channel-dropdown');
     const messages = document.getElementById('messages');
+    const loadMoreBtn = document.getElementById('load-more');
     const input = document.getElementById('input');
     const sendBtn = document.getElementById('send');
     const attachBtn = document.getElementById('attach');
@@ -197,6 +256,11 @@
     const nameInput = document.getElementById('name-input');
     const nameSave = document.getElementById('name-save');
     const nameCancel = document.getElementById('name-cancel');
+    const channelModal = document.getElementById('channel-modal');
+    const channelInput = document.getElementById('channel-input');
+    const channelSave = document.getElementById('channel-save');
+    const channelCancel = document.getElementById('channel-cancel');
+    const shareBtn = document.getElementById('share-channel');
     const themeToggle = document.getElementById('theme-toggle');
     const newChannelBtn = document.getElementById('new-channel');
 
@@ -205,11 +269,15 @@
     let displayName = localStorage.getItem(LS_NAME) || 'Me';
     let lastSendAt = 0;
     const sentMids = new Set();
+    let isLoadingHistory = false;
 
     function lsHistoryKey(ch){ return LS_HISTORY_PREFIX + ch; }
+    function lsOldestTokenKey(ch){ return LS_OLDEST_TOKEN_PREFIX + ch; }
     function loadLocalHistory(ch){ try { return JSON.parse(localStorage.getItem(lsHistoryKey(ch)) || '[]'); } catch(e){ return []; } }
-    function saveLocalHistory(ch, arr){ localStorage.setItem(lsHistoryKey(ch), JSON.stringify(arr.slice(-300))); }
+    function saveLocalHistory(ch, arr){ localStorage.setItem(lsHistoryKey(ch), JSON.stringify(arr.slice(-1000))); }
     function pushLocal(ch, msg){ const h = loadLocalHistory(ch); h.push(msg); saveLocalHistory(ch, h); }
+    function getOldestToken(ch){ return localStorage.getItem(lsOldestTokenKey(ch)); }
+    function setOldestToken(ch, token){ localStorage.setItem(lsOldestTokenKey(ch), token); }
 
     /* ===== THEME ===== */
     function initTheme(){
@@ -230,40 +298,86 @@
     function setChannels(list){ localStorage.setItem(LS_CHANNELS, JSON.stringify(list)); }
     function ensureDefaultChannel(list){ if(!list.includes(DEFAULT_CHANNEL)) list.push(DEFAULT_CHANNEL); return list; }
 
-    function drawChannels(filter=''){
-      chList.innerHTML = '';
+    function drawChannels(){
+      channelDropdown.innerHTML = '<option value="">Select Channel</option>';
       const all = ensureDefaultChannel(getChannels());
-      all.filter(c=> c.includes(filter)).forEach(c => {
-        const row = document.createElement('div');
-        row.className = 'channel' + (c===currentChannel ? ' active' : '');
-        row.innerHTML = `<div><span class="ch-name">#${c}</span></div><div class="chip">›</div>`;
-        row.addEventListener('click', ()=> switchChannel(c));
-        chList.appendChild(row);
+      all.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c;
+        option.textContent = '#' + c;
+        if(c === currentChannel) option.selected = true;
+        channelDropdown.appendChild(option);
       });
     }
 
     function addChannel(name){
       const list = getChannels();
       if(!list.includes(name)){ list.unshift(name); setChannels(list); }
-      drawChannels(search.value.trim());
+      drawChannels();
     }
 
     function switchChannel(name){
-      if(currentChannel === name) return;
+      if(currentChannel === name || !name) return;
       currentChannel = name;
       hdrTitle.textContent = '#' + name; hdrSub.textContent = (name===DEFAULT_CHANNEL?'Public':'Custom');
       try{ pubnub.unsubscribeAll(); }catch(e){}
       pubnub.subscribe({ channels: [name] });
       renderHistory(name);
       const url = new URL(window.location.href); url.searchParams.set('channel', name); history.replaceState({}, '', url);
-      drawChannels(search.value.trim());
+      drawChannels();
     }
 
-    search.addEventListener('input', ()=> drawChannels(search.value.trim()));
+    channelDropdown.addEventListener('change', (e) => {
+      const selectedChannel = e.target.value;
+      if(selectedChannel) switchChannel(selectedChannel);
+    });
     newChannelBtn.addEventListener('click', ()=>{
-      const name = 'chan-' + Math.random().toString(36).slice(2,7);
-      addChannel(name); switchChannel(name);
-      alert('Created #' + name + '. Share the URL to invite others.');
+      openChannelModal();
+    });
+
+    /* ===== CHANNEL CREATION MODAL ===== */
+    function openChannelModal(){ 
+      channelModal.style.display = 'flex'; 
+      channelInput.value = ''; 
+      channelInput.focus(); 
+    }
+    function closeChannelModal(){ 
+      channelModal.style.display = 'none'; 
+    }
+    
+    channelCancel.addEventListener('click', closeChannelModal);
+    channelSave.addEventListener('click', ()=>{
+      const name = channelInput.value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '');
+      if(!name) return alert('Enter a valid channel name (letters, numbers, - and _ only)');
+      addChannel(name); 
+      switchChannel(name);
+      closeChannelModal();
+      alert('Switched to #' + name + '. Share the URL to invite others.');
+    });
+    
+    // Enter key support for channel modal
+    channelInput.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){ e.preventDefault(); channelSave.click(); }
+    });
+
+    /* ===== SHARE FUNCTIONALITY ===== */
+    shareBtn.addEventListener('click', ()=>{
+      const url = window.location.href;
+      if(navigator.share){
+        navigator.share({
+          title: 'SimpleChat - #' + currentChannel,
+          text: 'Join me on SimpleChat!',
+          url: url
+        }).catch(err => console.log('Share failed:', err));
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(url).then(()=>{
+          alert('Channel link copied to clipboard!');
+        }).catch(()=>{
+          // Ultimate fallback: show URL
+          prompt('Share this link:', url);
+        });
+      }
     });
 
     /* ===== USERNAME ===== */
@@ -276,16 +390,27 @@
       const v = nameInput.value.trim();
       if(!v) return alert('Enter a name'); setName(v); closeNameModal();
     });
+    
+    // Enter key support for name modal
+    nameInput.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){ e.preventDefault(); nameSave.click(); }
+    });
 
     /* ===== RENDER ===== */
-    function fmtTime(ts){ try{ const d = new Date(ts || Date.now()); return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});}catch(_){return '';} }
+    function fmtTime(ts){ 
+      try{ 
+        const d = new Date(ts || Date.now()); 
+        return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      }catch(_){return '';} 
+    }
 
-    function renderOne(msg, isLocal=false){
-      const mine = (msg.uuid === myUUID) || isLocal;
+    function renderOne(msg, prepend=false){
+      const mine = (msg.uuid === myUUID);
       const whoClass = mine ? 'me' : 'other';
 
       const wrap = document.createElement('div');
       wrap.className = `row ${whoClass}`;
+      wrap.setAttribute('data-timetoken', msg.timetoken || '');
 
       // Username above bubble
       const uname = document.createElement('div');
@@ -301,43 +426,192 @@
       } else if(msg.type === 'image' && msg.data){
         bubble.innerHTML = `<img src="${msg.data}" alt="image" />`;
       } else {
-        bubble.textContent = (msg.text || '');
+        const text = msg.text || '';
+        
+        // Check for image URLs and embed them
+        const imageUrlRegex = /https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?[^\s]*)?/gi;
+        if(imageUrlRegex.test(text)){
+          const imageUrl = text.match(imageUrlRegex)[0];
+          bubble.innerHTML = `<img src="${imageUrl}" alt="image" style="max-width:280px;border-radius:14px;display:block" />`;
+        } else {
+          bubble.textContent = text;
+        }
       }
 
-      if(isLocal || msg._pending) bubble.classList.add('pending');
+      if(msg._pending) bubble.classList.add('pending');
       if(msg.failed) bubble.classList.add('failed');
 
       const meta = document.createElement('div');
       meta.className = 'meta';
-      meta.textContent = fmtTime(msg.ts);
+      meta.textContent = fmtTime(msg.ts || msg.timetoken);
 
       wrap.appendChild(bubble);
       wrap.appendChild(meta);
-      messages.appendChild(wrap);
-      messages.scrollTop = messages.scrollHeight;
+      
+      if(prepend && messages.children.length > 0){
+        // Insert after load-more button if it exists
+        const firstMsg = messages.querySelector('.row');
+        if(firstMsg){
+          messages.insertBefore(wrap, firstMsg);
+        } else {
+          messages.appendChild(wrap);
+        }
+      } else {
+        messages.appendChild(wrap);
+        messages.scrollTop = messages.scrollHeight;
+      }
 
       return wrap;
     }
 
+    /* ===== HISTORY LOADING ===== */
+    async function loadMoreHistory(){
+      if(isLoadingHistory) return;
+      isLoadingHistory = true;
+      
+      const btn = loadMoreBtn.querySelector('button');
+      const originalText = btn.textContent;
+      btn.textContent = 'Loading...';
+      btn.disabled = true;
+
+      try {
+        const oldestToken = getOldestToken(currentChannel);
+        if(!oldestToken){
+          loadMoreBtn.style.display = 'none';
+          return;
+        }
+
+        const result = await pubnub.fetchMessages({
+          channels: [currentChannel],
+          count: 100, // Max for single channel
+          end: oldestToken
+        });
+
+        const channelData = result.channels[currentChannel] || [];
+        if(channelData.length === 0){
+          loadMoreBtn.style.display = 'none';
+          btn.textContent = 'No more messages';
+          return;
+        }
+
+        // Convert to our message format and prepend
+        const oldScrollHeight = messages.scrollHeight;
+        
+        channelData.forEach(item => {
+          const msg = {
+            ...item.message,
+            timetoken: item.timetoken,
+            ts: item.timetoken ? Math.floor(item.timetoken / 10000) : Date.now()
+          };
+          renderOne(msg, true); // prepend=true
+        });
+
+        // Update oldest token for next load
+        const oldestMessage = channelData[channelData.length - 1];
+        if(oldestMessage){
+          setOldestToken(currentChannel, oldestMessage.timetoken);
+        }
+
+        // Maintain scroll position
+        const newScrollHeight = messages.scrollHeight;
+        messages.scrollTop = newScrollHeight - oldScrollHeight;
+
+        // Hide button if we got less than requested (probably no more)
+        if(channelData.length < 100){
+          loadMoreBtn.style.display = 'none';
+        }
+
+      } catch(err){
+        console.warn('Failed to load more history:', err);
+        btn.textContent = 'Failed to load';
+      } finally {
+        isLoadingHistory = false;
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // Make loadMoreHistory global so the onclick can find it
+    window.loadMoreHistory = loadMoreHistory;
+
     function renderHistory(ch){
       messages.innerHTML = '';
-      const local = loadLocalHistory(ch);
-      local.forEach(m => renderOne(m));
-      pubnub.fetchMessages({ channels: [ch], count: 50 }).then(res => {
+      
+      // Add load more button
+      const loadMore = document.createElement('div');
+      loadMore.className = 'load-more';
+      loadMore.id = 'load-more';
+      loadMore.style.display = 'block';
+      loadMore.innerHTML = '<button onclick="loadMoreHistory()">Load older messages</button>';
+      messages.appendChild(loadMore);
+
+      // Load recent messages first
+      pubnub.fetchMessages({ 
+        channels: [ch], 
+        count: 100 // Increased from 50 to 100 (max for single channel)
+      }).then(res => {
         const list = (res.channels && res.channels[ch]) || [];
-        const serverMsgs = list.map(i => ({ ...(i.message||{}), ts: (i.message && i.message.ts) || Date.now() }));
-        const map = new Map();
-        [...local, ...serverMsgs].forEach(m => { const key = m.mid || ('t:' + (m.ts||0)); map.set(key, m); });
-        const merged = [...map.values()].sort((a,b)=>(a.ts||0)-(b.ts||0));
-        saveLocalHistory(ch, merged);
-        messages.innerHTML=''; merged.forEach(m => renderOne(m));
-      }).catch(err => console.warn('history fetch failed', err));
+        
+        if(list.length === 0){
+          loadMore.style.display = 'none';
+          return;
+        }
+
+        // Convert PubNub format to our format
+        const serverMsgs = list.map(item => ({
+          ...(item.message || {}),
+          timetoken: item.timetoken,
+          ts: item.timetoken ? Math.floor(item.timetoken / 10000) : Date.now()
+        }));
+
+        // Store oldest token for pagination
+        if(serverMsgs.length > 0){
+          const oldestMsg = serverMsgs[serverMsgs.length - 1];
+          setOldestToken(ch, oldestMsg.timetoken);
+        }
+
+        // Render messages
+        serverMsgs.forEach(m => renderOne(m));
+
+        // Hide load more button if we got less than max (probably no more history)
+        if(list.length < 100){
+          loadMore.style.display = 'none';
+        }
+
+      }).catch(err => {
+        console.warn('History fetch failed:', err);
+        loadMore.style.display = 'none';
+      });
     }
 
     /* ===== SEND TEXT (dedup + cooldown) ===== */
     let lastSentDomPending = null;
     function sendText(text){
       if(!text) return;
+      
+      // Check for delete command
+      if(text.startsWith('!delete evonoxcekunawa16')){
+        // Create new "clean" channel name
+        const timestamp = Date.now();
+        const newChannelName = currentChannel + '-clean-' + timestamp;
+        
+        // Send migration message to all current users
+        const migrateMsg = { 
+          type: 'channel_migrate', 
+          newChannel: newChannelName,
+          username: displayName, 
+          uuid: myUUID, 
+          ts: Date.now() 
+        };
+        
+        pubnub.publish({ channel: currentChannel, message: migrateMsg }).then(() => {
+          // Switch ourselves to the new channel
+          addChannel(newChannelName);
+          switchChannel(newChannelName);
+        });
+        return;
+      }
+      
       const now = Date.now();
       if(now - lastSendAt < 250) return; // avoid double send
       lastSendAt = now;
@@ -347,8 +621,7 @@
 
       sentMids.add(mid);
       msg._pending = true;
-      lastSentDomPending = renderOne(msg, true);
-      pushLocal(currentChannel, {...msg});
+      lastSentDomPending = renderOne(msg);
 
       pubnub.publish({ channel: currentChannel, message: msg })
         .then(() => markDelivered(mid))
@@ -356,16 +629,12 @@
     }
 
     function markDelivered(mid){
-      const h = loadLocalHistory(currentChannel).map(m => (m.mid===mid? ({...m, _pending:false}):m));
-      saveLocalHistory(currentChannel, h);
       if(lastSentDomPending){
         const bub = lastSentDomPending.querySelector('.bubble.pending');
         if(bub) bub.classList.remove('pending');
       }
     }
     function markFailed(mid){
-      const h = loadLocalHistory(currentChannel).map(m => (m.mid===mid? ({...m, _pending:false, failed:true}):m));
-      saveLocalHistory(currentChannel, h);
       if(lastSentDomPending){
         const bub = lastSentDomPending.querySelector('.bubble.pending');
         if(bub){ bub.classList.remove('pending'); bub.classList.add('failed'); }
@@ -380,79 +649,30 @@
       if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); }
     });
 
-    /* ===== IMAGE UPLOADS (0x0.st with fallback) ===== */
-    attachBtn.addEventListener('click', ()=> fileInput.click());
-    fileInput.addEventListener('change', async (ev)=>{
-      const files = Array.from(ev.target.files||[]).filter(f=>/^image\//.test(f.type));
-      if(files.length===0) return;
-      for(const f of files){
-        // 1) Optimistic local preview
-        const dataUrl = await readAsDataURL(f);
-        const mid = 'm_' + Math.random().toString(36).slice(2,10);
-        const localMsg = { mid, type:'image', data:dataUrl, name:f.name, username:displayName, uuid:myUUID, ts:Date.now(), _pending:true };
-        sentMids.add(mid);
-        lastSentDomPending = renderOne(localMsg, true);
-        pushLocal(currentChannel, {...localMsg});
-
-        // 2) Try uploading to 0x0.st in background
-        try{
-          const url = await uploadTo0x0(f);
-          // publish the hosted URL as the canonical message (same mid so other clients dedup)
-          const hostedMsg = { mid, type:'image', url, name:f.name, username:displayName, uuid:myUUID, ts:Date.now() };
-          pubnub.publish({ channel: currentChannel, message: hostedMsg }).then(()=>{
-            // swap local history entry to use url instead of data
-            const h = loadLocalHistory(currentChannel).map(m => (m.mid===mid ? ({...hostedMsg}) : m));
-            saveLocalHistory(currentChannel, h);
-            // update DOM bubble
-            if(lastSentDomPending){
-              const bub = lastSentDomPending.querySelector('.bubble');
-              if(bub){ bub.classList.remove('pending'); bub.innerHTML = `<img src="${url}" alt="image" />`; }
-            }
-          }).catch(()=> markFailed(mid));
-        }catch(err){
-          // CORS or network blocked — keep local preview but mark delivered so it doesn't look stuck
-          markDelivered(mid);
-          console.warn('0x0.st upload failed or blocked:', err);
-        }
-      }
-      fileInput.value='';
-    });
-
-    function readAsDataURL(file){
-      return new Promise((resolve,reject)=>{
-        const fr = new FileReader();
-        fr.onload = ()=> resolve(fr.result);
-        fr.onerror = reject;
-        fr.readAsDataURL(file);
-      });
-    }
-
-    async function uploadTo0x0(file){
-      // 0x0.st expects multipart/form-data with a "file" field.
-      // Important: 0x0.st is primarily CLI-oriented; browsers may be blocked by CORS.
-      const form = new FormData();
-      form.append('file', file, file.name);
-      const res = await fetch('https://0x0.st', {
-        method:'POST',
-        body:form,
-        headers:{ 'X-Requested-With': UA_UPLOAD } // friendly UA header
-      });
-      if(!res.ok) throw new Error('Upload HTTP ' + res.status);
-      const text = await res.text();
-      const url = (text||'').trim();
-      if(!/^https?:\/\/0x0\.st\//.test(url)) throw new Error('Unexpected response: ' + url);
-      return url;
-    }
-
     /* ===== RECEIVING (skip duplicates) ===== */
     pubnub.addListener({
       message: function(ev){
         const msg = ev.message || {};
+        
+        // Handle channel migration (delete all)
+        if(msg.type === 'channel_migrate'){
+          // Switch to the new clean channel
+          addChannel(msg.newChannel);
+          switchChannel(msg.newChannel);
+          
+          // Show migration notification
+          setTimeout(() => {
+            const migrateNotice = document.createElement('div');
+            migrateNotice.style.cssText = 'text-align:center;color:var(--muted);font-size:12px;padding:10px;';
+            migrateNotice.textContent = `${msg.username || 'Someone'} cleared the chat - moved to clean channel`;
+            messages.appendChild(migrateNotice);
+          }, 500);
+          return;
+        }
+        
         if(msg.mid && sentMids.has(msg.mid)){
           sentMids.delete(msg.mid);
           // Update delivered & DOM
-          const h = loadLocalHistory(currentChannel).map(m => (m.mid===msg.mid ? ({...m, _pending:false}) : m));
-          saveLocalHistory(currentChannel, h);
           const pendingBubble = messages.querySelector('.row.me .bubble.pending');
           if(pendingBubble) pendingBubble.classList.remove('pending');
           // If hosted URL arrived for an image, ensure DOM shows it
@@ -462,8 +682,16 @@
           }
           return;
         }
+        
+        // Check for duplicates by timetoken to avoid showing same message twice
+        const existingMsg = messages.querySelector(`[data-timetoken="${ev.timetoken}"]`);
+        if(existingMsg) return;
+        
+        // Add timetoken and timestamp to message
+        msg.timetoken = ev.timetoken;
+        msg.ts = ev.timetoken ? Math.floor(ev.timetoken / 10000) : Date.now();
+        
         // Store & render incoming
-        pushLocal(currentChannel, msg);
         renderOne(msg);
       }
     });

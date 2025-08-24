@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anagram Solver</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800;900&display=swap');
         
         * {
             margin: 0;
@@ -14,28 +14,63 @@
         }
         
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.18);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
-            --text-primary: #ffffff;
-            --text-secondary: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.7);
-            --accent-blue: #007AFF;
+            --glass-bg-light: rgba(255, 255, 255, 0.1);
+            --glass-border-light: rgba(255, 255, 255, 0.18);
+            --glass-shadow-light: 0 8px 32px rgba(0, 0, 0, 0.37);
+            --text-primary-light: #ffffff;
+            --text-secondary-light: #ffffff;
+            --text-muted-light: rgba(255, 255, 255, 0.7);
+            --bg-gradient-light: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #8b5fbf 70%, #9b59b6 100%);
+            
+            --glass-bg-dark: rgba(15, 15, 15, 0.7);
+            --glass-bg-hover-dark: rgba(20, 20, 20, 0.85);
+            --glass-border-dark: rgba(255, 255, 255, 0.08);
+            --glass-border-hover-dark: rgba(255, 255, 255, 0.15);
+            --glass-shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --glass-shadow-hover-dark: 0 20px 60px rgba(0, 0, 0, 0.8);
+            --text-primary-dark: #ffffff;
+            --text-secondary-dark: rgba(255, 255, 255, 0.85);
+            --text-muted-dark: rgba(255, 255, 255, 0.6);
+            --bg-gradient-dark: linear-gradient(-45deg, #0a0a0a, #1a0d2e, #0d1421, #1a1a2e, #16213e);
+            
+            --accent-blue: #0A84FF;
             --accent-hover: #0056CC;
-            --accent-glow: rgba(0, 122, 255, 0.4);
-            --success: #30D158;
+            --accent-glow: rgba(10, 132, 255, 0.3);
+            --success: #32D74B;
             --error: #FF453A;
+            --warning: #FF9F0A;
         }
-        
+
         body {
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #8b5fbf 70%, #9b59b6 100%);
+            background: var(--bg-gradient-light);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
             min-height: 100vh;
-            color: var(--text-primary);
+            color: var(--text-primary-light);
             font-feature-settings: 'kern' 1, 'liga' 1;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
+            position: relative;
+            transition: all 0.6s ease;
+        }
+
+        body.dark-mode {
+            background: var(--bg-gradient-dark);
+            color: var(--text-primary-dark);
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         .background-effects {
@@ -50,6 +85,103 @@
                 radial-gradient(circle at 20% 80%, rgba(156, 39, 176, 0.3) 0%, transparent 50%),
                 radial-gradient(circle at 80% 20%, rgba(103, 58, 183, 0.3) 0%, transparent 50%),
                 radial-gradient(circle at 40% 40%, rgba(63, 81, 181, 0.2) 0%, transparent 50%);
+            transition: all 0.6s ease;
+        }
+
+        body.dark-mode .background-effects {
+            background: 
+                radial-gradient(circle at 15% 85%, rgba(10, 132, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 15%, rgba(50, 215, 75, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255, 159, 10, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 25% 25%, rgba(255, 69, 58, 0.08) 0%, transparent 40%);
+            animation: breathe 12s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Stellar particles for dark mode */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        body.dark-mode .particles {
+            opacity: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: twinkle 4s infinite ease-in-out;
+        }
+
+        .particle.small {
+            width: 1px;
+            height: 1px;
+            animation-duration: 3s;
+        }
+
+        .particle.medium {
+            width: 2px;
+            height: 2px;
+            animation-duration: 4s;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+        }
+
+        .particle.large {
+            width: 3px;
+            height: 3px;
+            animation-duration: 5s;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+        }
+
+        .particle.colored {
+            animation-duration: 6s;
+        }
+
+        .particle.colored.blue {
+            background: rgba(10, 132, 255, 0.8);
+            box-shadow: 0 0 6px rgba(10, 132, 255, 0.4);
+        }
+
+        .particle.colored.green {
+            background: rgba(50, 215, 75, 0.8);
+            box-shadow: 0 0 6px rgba(50, 215, 75, 0.4);
+        }
+
+        .particle.colored.orange {
+            background: rgba(255, 159, 10, 0.8);
+            box-shadow: 0 0 6px rgba(255, 159, 10, 0.4);
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            25% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(0.8);
+            }
+            75% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
         }
 
         .container {
@@ -71,12 +203,37 @@
         }
 
         .glass-card {
-            background: var(--glass-bg);
+            background: var(--glass-bg-light);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--glass-border-light);
             border-radius: 20px;
-            box-shadow: var(--glass-shadow);
+            box-shadow: var(--glass-shadow-light);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+        }
+
+        body.dark-mode .glass-card {
+            background: var(--glass-bg-dark);
+            border: 1px solid var(--glass-border-dark);
+            box-shadow: var(--glass-shadow-dark);
+        }
+
+        body.dark-mode .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        body.dark-mode .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--glass-shadow-hover-dark);
+            border-color: var(--glass-border-hover-dark);
+            background: var(--glass-bg-hover-dark);
         }
 
         .header-card {
@@ -88,16 +245,29 @@
         .title {
             font-size: 2.5rem;
             font-weight: 700;
-            color: var(--text-primary);
             margin-bottom: 12px;
             letter-spacing: -0.025em;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .title {
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
         }
         
         .subtitle {
             font-size: 1rem;
-            color: var(--text-muted);
+            color: var(--text-muted-light);
             font-weight: 400;
             line-height: 1.5;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .subtitle {
+            color: var(--text-muted-dark);
         }
 
         .input-card {
@@ -111,7 +281,7 @@
 
         .dict-status {
             font-size: 0.9rem;
-            color: var(--text-muted);
+            color: var(--text-muted-light);
             text-align: center;
             padding: 12px 16px;
             background: rgba(255, 255, 255, 0.05);
@@ -120,10 +290,15 @@
             transition: all 0.3s ease;
         }
 
+        body.dark-mode .dict-status {
+            color: var(--text-muted-dark);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
         .dict-status.loaded {
             color: var(--success);
-            border-color: rgba(48, 209, 88, 0.3);
-            background: rgba(48, 209, 88, 0.1);
+            border-color: rgba(50, 215, 75, 0.3);
+            background: rgba(50, 215, 75, 0.1);
         }
 
         .dict-status.error {
@@ -144,9 +319,15 @@
             background: rgba(255, 255, 255, 0.08);
             border: 1.5px solid rgba(255, 255, 255, 0.15);
             border-radius: 14px;
-            color: var(--text-primary);
+            color: var(--text-primary-light);
             transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
             font-family: inherit;
+        }
+
+        body.dark-mode .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary-dark);
         }
         
         .input-field:focus {
@@ -156,10 +337,19 @@
             box-shadow: 0 0 0 3px var(--accent-glow);
             transform: translateY(-1px);
         }
+
+        body.dark-mode .input-field:focus {
+            background: rgba(255, 255, 255, 0.08);
+        }
         
         .input-field::placeholder {
-            color: var(--text-muted);
+            color: var(--text-muted-light);
             font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .input-field::placeholder {
+            color: var(--text-muted-dark);
         }
         
         .solve-btn {
@@ -216,7 +406,7 @@
         .results-title {
             font-size: 1.5rem;
             font-weight: 600;
-            color: var(--text-primary);
+            transition: color 0.3s ease;
         }
 
         .header-controls {
@@ -231,23 +421,45 @@
             border-radius: 16px;
             font-size: 0.9rem;
             font-weight: 500;
-            color: var(--text-muted);
+            color: var(--text-muted-light);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
         }
 
-        .settings-btn {
+        body.dark-mode .results-count {
+            color: var(--text-muted-dark);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .settings-btn, .theme-toggle {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: var(--text-muted);
+            color: var(--text-muted-light);
+            font-size: 1.1rem;
         }
 
-        .settings-btn:hover {
+        body.dark-mode .settings-btn,
+        body.dark-mode .theme-toggle {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted-dark);
+        }
+
+        .settings-btn:hover, .theme-toggle:hover {
             background: rgba(255, 255, 255, 0.15);
-            color: var(--text-primary);
+            color: var(--text-primary-light);
+            transform: translateY(-1px);
+        }
+
+        body.dark-mode .settings-btn:hover,
+        body.dark-mode .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-primary-dark);
         }
 
         .settings-dropdown {
@@ -255,18 +467,24 @@
             top: 100%;
             right: 0;
             margin-top: 8px;
-            background: rgba(26, 26, 26, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 16px;
-            padding: 16px;
-            min-width: 250px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            min-width: 280px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
             z-index: 100;
             opacity: 0;
             transform: translateY(-10px);
             pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        body.dark-mode .settings-dropdown {
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
         }
 
         .settings-dropdown.show {
@@ -275,39 +493,97 @@
             pointer-events: all;
         }
 
+        .settings-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .settings-dropdown::before {
+            border-bottom-color: rgba(20, 20, 20, 0.95);
+        }
+
         .settings-section {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         .settings-section:last-child {
             margin-bottom: 0;
         }
 
+        .settings-section::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .settings-section::after {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .settings-section:last-child::after {
+            display: none;
+        }
+
         .settings-label {
-            font-size: 0.9rem;
-            color: var(--text-primary);
+            font-size: 0.95rem;
+            color: rgba(0, 0, 0, 0.8);
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             display: block;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .settings-label {
+            color: var(--text-primary-dark);
         }
 
         .settings-option {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
+            gap: 10px;
+            margin-bottom: 8px;
             cursor: pointer;
-            padding: 4px 0;
+            padding: 6px 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .settings-option:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .settings-option:hover {
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .settings-option input[type="radio"] {
             accent-color: var(--accent-blue);
+            transform: scale(1.1);
         }
 
         .settings-option label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
+            font-size: 0.9rem;
+            color: rgba(0, 0, 0, 0.7);
             cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .settings-option label {
+            color: var(--text-secondary-dark);
         }
 
         .file-input-wrapper {
@@ -325,18 +601,30 @@
         .file-input-btn {
             display: block;
             width: 100%;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 0.9rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        body.dark-mode .file-input-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--text-muted-dark);
         }
 
         .file-input-btn:hover {
+            background: rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+        }
+
+        body.dark-mode .file-input-btn:hover {
             background: rgba(255, 255, 255, 0.12);
         }
         
@@ -372,10 +660,10 @@
         .length-header {
             font-size: 1rem;
             font-weight: 600;
-            color: var(--text-primary);
             margin-bottom: 8px;
             padding-bottom: 4px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: color 0.3s ease;
         }
 
         .length-words {
@@ -392,7 +680,6 @@
             text-align: center;
             font-weight: 600;
             font-size: 1rem;
-            color: var(--text-primary);
             border: 1px solid rgba(255, 255, 255, 0.12);
             transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
             animation: fadeInScale 0.4s cubic-bezier(0.23, 1, 0.32, 1);
@@ -404,12 +691,23 @@
             align-items: center;
             justify-content: center;
         }
+
+        body.dark-mode .result-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
         
         .result-item:hover {
             background: rgba(255, 255, 255, 0.15);
             transform: translateY(-2px) scale(1.02);
             border-color: rgba(255, 255, 255, 0.25);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode .result-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
         
         @keyframes fadeInScale {
@@ -450,8 +748,13 @@
             align-items: center;
             justify-content: center;
             height: 200px;
-            color: var(--text-muted);
+            color: var(--text-muted-light);
             font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .loading {
+            color: var(--text-muted-dark);
         }
         
         .spinner {
@@ -487,18 +790,31 @@
             margin-top: 16px;
             padding: 12px;
             font-size: 0.8rem;
-            color: var(--text-muted);
+            color: var(--text-muted-light);
             opacity: 0.8;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .credits {
+            color: var(--text-muted-dark);
         }
 
         .credits a {
-            color: var(--text-muted);
+            color: var(--text-muted-light);
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
+        body.dark-mode .credits a {
+            color: var(--text-muted-dark);
+        }
+
         .credits a:hover {
-            color: var(--text-primary);
+            color: var(--text-primary-light);
+        }
+
+        body.dark-mode .credits a:hover {
+            color: var(--text-primary-dark);
         }
         
         @media (max-width: 1024px) {
@@ -543,6 +859,7 @@
 </head>
 <body>
     <div class="background-effects"></div>
+    <div class="particles" id="particles"></div>
     
     <div class="container">
         <div class="left-panel">
@@ -573,7 +890,8 @@
                     <h3 class="results-title">Words Found</h3>
                     <div class="header-controls">
                         <span class="results-count" id="resultsCount">...</span>
-                        <div class="settings-btn" id="settingsBtn" style="position: relative;">
+                        <div class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</div>
+                        <div class="settings-btn" id="settingsBtn" style="position: relative;" title="Settings">
                             ⚙️
                             <div class="settings-dropdown" id="settingsDropdown">
                                 <div class="settings-section">
@@ -585,6 +903,17 @@
                                     <div class="settings-option">
                                         <input type="radio" id="sortAlpha" name="sortType" value="alphabetical">
                                         <label for="sortAlpha">Alphabetical</label>
+                                    </div>
+                                </div>
+                                <div class="settings-section">
+                                    <label class="settings-label">Visual Effects:</label>
+                                    <div class="settings-option">
+                                        <input type="radio" id="effectsOn" name="effects" value="on" checked>
+                                        <label for="effectsOn">Enable stars (dark mode)</label>
+                                    </div>
+                                    <div class="settings-option">
+                                        <input type="radio" id="effectsOff" name="effects" value="off">
+                                        <label for="effectsOff">Minimal effects</label>
                                     </div>
                                 </div>
                                 <div class="settings-section">
@@ -609,6 +938,77 @@
         let isDictionaryLoaded = false;
         let currentResults = [];
         let currentSortType = 'grouped';
+        let isDarkMode = false;
+        let effectsEnabled = true;
+
+        // Theme toggle functionality
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+                themeToggle.title = 'Switch to light mode';
+                if (effectsEnabled) {
+                    createParticles();
+                }
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+                themeToggle.title = 'Switch to dark mode';
+                clearParticles();
+            }
+        }
+
+        // Create stellar particles for dark mode
+        function createParticles() {
+            if (!isDarkMode || !effectsEnabled) return;
+            
+            const particlesContainer = document.getElementById('particles');
+            particlesContainer.innerHTML = '';
+            const particleCount = 80;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Randomly assign sizes
+                const sizeRandom = Math.random();
+                if (sizeRandom < 0.6) {
+                    particle.classList.add('small');
+                } else if (sizeRandom < 0.85) {
+                    particle.classList.add('medium');
+                } else {
+                    particle.classList.add('large');
+                }
+
+                // Randomly assign colors (20% chance for colored particles)
+                if (Math.random() < 0.2) {
+                    particle.classList.add('colored');
+                    const colorRandom = Math.random();
+                    if (colorRandom < 0.4) {
+                        particle.classList.add('blue');
+                    } else if (colorRandom < 0.7) {
+                        particle.classList.add('green');
+                    } else {
+                        particle.classList.add('orange');
+                    }
+                }
+                
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function clearParticles() {
+            const particlesContainer = document.getElementById('particles');
+            particlesContainer.innerHTML = '';
+        }
 
         async function loadDictionary() {
             const dictStatus = document.getElementById('dictStatus');
@@ -860,6 +1260,9 @@
             }, 100);
         }
 
+        // Event listeners
+        document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
+
         // Settings functionality
         document.getElementById('settingsBtn').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -885,6 +1288,20 @@
             });
         });
 
+        // Effects toggle
+        document.querySelectorAll('input[name="effects"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                effectsEnabled = e.target.value === 'on';
+                if (isDarkMode) {
+                    if (effectsEnabled) {
+                        createParticles();
+                    } else {
+                        clearParticles();
+                    }
+                }
+            });
+        });
+
         // File input
         document.getElementById('fileInput').addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
@@ -899,6 +1316,7 @@
             }
         });
 
+        // Initialize
         document.getElementById('lettersInput').focus();
         loadDictionary();
     </script>

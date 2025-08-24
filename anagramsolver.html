@@ -995,6 +995,56 @@
         let isDarkMode = false;
         let effectsEnabled = true;
 
+        // Preferences management
+        const PREFERENCES_KEY = 'anagramSolverPreferences';
+
+        function savePreferences() {
+            const preferences = {
+                theme: isDarkMode ? 'dark' : 'light',
+                sortType: currentSortType,
+                effects: effectsEnabled
+            };
+            localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
+        }
+
+        function loadPreferences() {
+            try {
+                const saved = localStorage.getItem(PREFERENCES_KEY);
+                if (saved) {
+                    const preferences = JSON.parse(saved);
+                    
+                    // Apply theme preference
+                    if (preferences.theme === 'dark') {
+                        isDarkMode = true;
+                        document.body.classList.add('dark-mode');
+                        document.getElementById('themeIcon').textContent = '☀️';
+                        document.getElementById('themeText').textContent = 'Light Mode';
+                    }
+                    
+                    // Apply sort preference
+                    if (preferences.sortType) {
+                        currentSortType = preferences.sortType;
+                        const sortRadio = document.querySelector(`input[name="sortType"][value="${currentSortType}"]`);
+                        if (sortRadio) sortRadio.checked = true;
+                    }
+                    
+                    // Apply effects preference
+                    if (preferences.effects !== undefined) {
+                        effectsEnabled = preferences.effects;
+                        const effectsRadio = document.querySelector(`input[name="effects"][value="${effectsEnabled ? 'on' : 'off'}"]`);
+                        if (effectsRadio) effectsRadio.checked = true;
+                    }
+                    
+                    // Initialize particles if needed
+                    if (isDarkMode && effectsEnabled) {
+                        createParticles();
+                    }
+                }
+            } catch (error) {
+                console.log('Could not load preferences:', error);
+            }
+        }
+
         // Theme toggle functionality
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
@@ -1015,6 +1065,8 @@
                 themeText.textContent = 'Dark Mode';
                 clearParticles();
             }
+            
+            savePreferences();
         }
 
         // Create stellar particles for dark mode
@@ -1337,6 +1389,7 @@
         document.querySelectorAll('input[name="sortType"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 currentSortType = e.target.value;
+                savePreferences();
                 if (currentResults.length > 0) {
                     displayResults(currentResults);
                 }
@@ -1347,6 +1400,7 @@
         document.querySelectorAll('input[name="effects"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 effectsEnabled = e.target.value === 'on';
+                savePreferences();
                 if (isDarkMode) {
                     if (effectsEnabled) {
                         createParticles();
@@ -1371,7 +1425,8 @@
             }
         });
 
-        // Initialize
+        // Initialize - Load preferences first, then load dictionary
+        loadPreferences();
         document.getElementById('lettersInput').focus();
         loadDictionary();
     </script>

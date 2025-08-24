@@ -1,6 +1,6 @@
 # Simple HTMLs
 
-These are just some HTMLs that I made for fun with a little help from the goat Claude.
+These are just some HTMLs that I made for fun with a little help from the goats Claude and ChatGPT
 
 
 

@@ -6,8 +6,6 @@
     <link rel="icon" href="https://github.com/zfex77/simplehtmls/blob/main/src/logo3.png?raw=true" type="image/x-icon">
     <title>SimpleHTMLs</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800;900&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
@@ -15,636 +13,438 @@
         }
         
         :root {
-            --glass-bg: rgba(15, 15, 15, 0.7);
-            --glass-bg-hover: rgba(20, 20, 20, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-border-hover: rgba(255, 255, 255, 0.15);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            --glass-shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.8);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.85);
-            --text-muted: rgba(255, 255, 255, 0.6);
-            --accent-blue: #0A84FF;
-            --accent-hover: #0056CC;
-            --accent-glow: rgba(10, 132, 255, 0.3);
-            --success: #32D74B;
-            --warning: #FF9F0A;
-            --error: #FF453A;
-            --dark-overlay: rgba(0, 0, 0, 0.3);
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border-primary: #30363d;
+            --border-accent: #f78166;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-orange: #f78166;
+            --accent-blue: #58a6ff;
+            --accent-green: #7c3aed;
+            --accent-purple: #a5a5f5;
+            --shadow-light: rgba(240, 246, 252, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.3);
+            --shadow-heavy: rgba(0, 0, 0, 0.6);
+        }
+
+        html {
+            min-height: 100vh;
+            min-height: 100dvh;
         }
 
         body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(-45deg, #0a0a0a, #1a0d2e, #0d1421, #1a1a2e, #16213e);
-            background-size: 400% 400%;
-            animation: gradientShift 20s ease infinite;
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
             color: var(--text-primary);
-            font-feature-settings: 'kern' 1, 'liga' 1;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        .background-effects {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            background: 
-                radial-gradient(circle at 15% 85%, rgba(10, 132, 255, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 85% 15%, rgba(50, 215, 75, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(255, 159, 10, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 25% 25%, rgba(255, 69, 58, 0.08) 0%, transparent 40%);
-            animation: breathe 12s ease-in-out infinite;
-        }
-
-        @keyframes breathe {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 0.8; }
+            line-height: 1.6;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(120, 58, 237, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(247, 129, 102, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, transparent 40%, rgba(88, 166, 255, 0.03) 60%);
+            background-attachment: fixed;
         }
 
         .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 60px 40px;
+            padding: 0 24px;
         }
 
-        .hero-section {
+        .header {
+            padding: 80px 0 60px 0;
             text-align: center;
-            margin-bottom: 80px;
-            animation: slideInUp 1s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .hero-title {
-            font-size: 4.5rem;
-            font-weight: 900;
-            color: var(--text-primary);
-            margin-bottom: 24px;
-            letter-spacing: -0.04em;
-            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
             position: relative;
         }
 
+        .title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
 
-
-        .hero-subtitle {
-            font-size: 1.4rem;
-            color: var(--text-muted);
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
             font-weight: 400;
-            max-width: 700px;
-            margin: 0 auto 32px auto;
-            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .hero-author {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            margin-top: 8px;
+        .main-content {
+            padding-bottom: 80px;
         }
 
-        .hero-author a {
-            color: var(--accent-blue);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .hero-author a:hover {
-            color: var(--text-primary);
-            text-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        .hero-author a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -4px;
-            left: 0;
-            background: var(--accent-blue);
-            transition: width 0.3s ease;
-        }
-
-        .hero-author a:hover::after {
-            width: 100%;
-        }
-
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px;
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 40px;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            position: relative;
-        }
-
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        }
-
-        .glass-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: var(--glass-shadow-hover);
-            border-color: var(--glass-border-hover);
-            background: var(--glass-bg-hover);
-        }
-
-        .section-header {
-            padding: 40px 40px 32px 40px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            position: relative;
+        .section {
+            margin-bottom: 60px;
         }
 
         .section-title {
-            font-size: 2.2rem;
-            font-weight: 700;
+            font-size: 1.5rem;
+            font-weight: 600;
             color: var(--text-primary);
-            margin: 0;
-            letter-spacing: -0.03em;
+            margin-bottom: 24px;
         }
 
-        .tool-list {
-            padding: 0;
-            margin: 0;
-            list-style: none;
+        .apps-grid {
+            display: grid;
+            gap: 16px;
         }
 
-        .tool-item {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        .app-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-        }
-
-        .tool-item:last-child {
-            border-bottom: none;
-        }
-
-        .tool-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(10, 132, 255, 0.05), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .tool-item:hover::before {
-            left: 100%;
-        }
-
-        .tool-item:hover {
-            background: rgba(255, 255, 255, 0.04);
-            transform: translateX(12px);
-            border-left: 3px solid var(--accent-blue);
-        }
-
-        .tool-link {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 28px 40px;
             text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
+            color: inherit;
+            display: block;
         }
 
-        .tool-link:hover {
-            color: var(--text-primary);
-        }
-
-        .tool-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .tool-icon {
-            width: 52px;
-            height: 52px;
-            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .tool-icon::before {
+        .app-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(50, 215, 75, 0.1));
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-orange), var(--accent-purple), var(--accent-blue));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
         }
 
-        .tool-item:hover .tool-icon::before {
-            opacity: 1;
+        .app-card:hover::before {
+            transform: scaleX(1);
         }
 
-        .tool-item:hover .tool-icon {
-            transform: scale(1.15) rotate(8deg);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            border-color: rgba(255, 255, 255, 0.2);
+        .app-card:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-accent);
+            transform: translateY(-4px);
+            box-shadow: 
+                0 12px 40px var(--shadow-medium),
+                0 0 0 1px rgba(247, 129, 102, 0.1);
         }
 
-        .tool-name {
-            font-weight: 600;
-            letter-spacing: -0.01em;
+        .app-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
         }
 
-        .status-badge {
-            padding: 8px 16px;
-            border-radius: 16px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+        .app-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
             transition: all 0.3s ease;
         }
 
-        .status-complete {
-            background: rgba(50, 215, 75, 0.15);
-            color: var(--success);
-            border: 1px solid rgba(50, 215, 75, 0.3);
+        .app-card:hover .app-icon {
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-purple));
+            border-color: transparent;
+            transform: rotate(8deg) scale(1.1);
+            color: white;
+        }
+
+        .app-info {
+            flex: 1;
+        }
+
+        .app-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .app-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .status-live {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .status-beta {
-            background: rgba(255, 159, 10, 0.15);
-            color: var(--warning);
-            border: 1px solid rgba(255, 159, 10, 0.3);
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+            border: 1px solid rgba(249, 115, 22, 0.2);
         }
 
-        .status-wip {
-            background: rgba(255, 69, 58, 0.15);
-            color: var(--error);
-            border: 1px solid rgba(255, 69, 58, 0.3);
+        .status-new {
+            background: rgba(168, 85, 247, 0.1);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.2);
         }
 
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .app-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .footer {
+            border-top: 1px solid var(--border-primary);
+            padding: 40px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-orange);
+        }
+
+        .footer-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-orange);
+            transition: width 0.3s ease;
+        }
+
+        .footer-link:hover::after {
+            width: 100%;
+        }
+
+        .footer-divider {
+            width: 1px;
+            height: 16px;
+            background: var(--border-primary);
+        }
+
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
             }
+
+            .header {
+                padding: 60px 0 40px 0;
+            }
+
+            .title {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .footer-divider {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-card {
+                padding: 20px;
+            }
+
+            .app-header {
+                gap: 12px;
+            }
+
+            .app-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Loading animation for cards */
+        .app-card {
+            animation: slideUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .app-card:nth-child(1) { animation-delay: 0.1s; }
+        .app-card:nth-child(2) { animation-delay: 0.2s; }
+        .app-card:nth-child(3) { animation-delay: 0.3s; }
+        .app-card:nth-child(4) { animation-delay: 0.4s; }
+        .app-card:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideUp {
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        @keyframes fadeInCard {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+        /* Enhanced focus states for accessibility */
+        .app-card:focus-visible {
+            outline: 2px solid var(--accent-orange);
+            outline-offset: 2px;
         }
 
-        .glass-card:nth-child(2) {
-            animation: fadeInCard 1s cubic-bezier(0.23, 1, 0.32, 1) 0.2s both;
-        }
-
-        .glass-card:nth-child(3) {
-            animation: fadeInCard 1s cubic-bezier(0.23, 1, 0.32, 1) 0.4s both;
-        }
-
-        .glass-card:nth-child(4) {
-            animation: fadeInCard 1s cubic-bezier(0.23, 1, 0.32, 1) 0.6s both;
-        }
-
-        /* Enhanced icons with better styling */
-        .icon-decode::before { content: '🔓'; }
-        .icon-convert::before { content: '🔄'; }
-        .icon-chat::before { content: '💬'; }
-        .icon-anagram::before { content: '🔤'; }
-        .icon-solver::before { content: '🧩'; }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .container {
-                max-width: 900px;
-                padding: 40px 30px;
-            }
-            
-            .hero-title {
-                font-size: 3.5rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px 20px;
-            }
-
-            .hero-title {
-                font-size: 2.8rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1.2rem;
-            }
-
-            .section-header {
-                padding: 32px 24px 24px 24px;
-            }
-
-            .section-title {
-                font-size: 1.8rem;
-            }
-
-            .tool-link {
-                padding: 20px 24px;
-                font-size: 1.1rem;
-            }
-
-            .tool-icon {
-                width: 44px;
-                height: 44px;
-                font-size: 1.2rem;
-            }
-
-            .tool-info {
-                gap: 16px;
-            }
-
-            .tool-item:hover {
-                transform: translateX(8px);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero-title {
-                font-size: 2.2rem;
-            }
-
-            .glass-card {
-                border-radius: 20px;
-            }
-
-            .section-header {
-                padding: 24px 20px 20px 20px;
-            }
-
-            .tool-link {
-                padding: 16px 20px;
-            }
-        }
-
-        /* Stellar background particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .particle {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            animation: twinkle 4s infinite ease-in-out;
-        }
-
-        .particle.small {
-            width: 1px;
-            height: 1px;
-            animation-duration: 3s;
-        }
-
-        .particle.medium {
-            width: 2px;
-            height: 2px;
-            animation-duration: 4s;
-            box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
-        }
-
-        .particle.large {
-            width: 3px;
-            height: 3px;
-            animation-duration: 5s;
-            box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
-        }
-
-        .particle.colored {
-            animation-duration: 6s;
-        }
-
-        .particle.colored.blue {
-            background: rgba(10, 132, 255, 0.8);
-            box-shadow: 0 0 6px rgba(10, 132, 255, 0.4);
-        }
-
-        .particle.colored.green {
-            background: rgba(50, 215, 75, 0.8);
-            box-shadow: 0 0 6px rgba(50, 215, 75, 0.4);
-        }
-
-        .particle.colored.orange {
-            background: rgba(255, 159, 10, 0.8);
-            box-shadow: 0 0 6px rgba(255, 159, 10, 0.4);
-        }
-
-        @keyframes twinkle {
-            0%, 100% {
-                opacity: 0.3;
-                transform: scale(1);
-            }
-            25% {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-            50% {
-                opacity: 0.6;
-                transform: scale(0.8);
-            }
-            75% {
-                opacity: 1;
-                transform: scale(1.1);
-            }
+        .footer-link:focus-visible {
+            outline: 2px solid var(--accent-orange);
+            outline-offset: 4px;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <div class="background-effects"></div>
-    <div class="particles" id="particles"></div>
-    
     <div class="container">
-        <div class="hero-section">
-            <h1 class="hero-title">SimpleHTMLs</h1>
-            <p class="hero-subtitle">Random applications that do random things</p>
-            <p class="hero-author">
-                by <a href="https://github.com/zfex77" target="_blank">zfex77</a>
-            </p>
-        </div>
+        <header class="header">
+            <h1 class="title">SimpleHTMLs</h1>
+            <p class="subtitle">Random applications that do random things</p>
+        </header>
 
-        <div class="glass-card">
-            <div class="section-header">
+        <main class="main-content">
+            <section class="section">
                 <h2 class="section-title">Applications</h2>
+                <div class="apps-grid">
+                    <a href="https://simplechat.pages.dev" class="app-card">
+                        <div class="app-header">
+                            <div class="app-icon">💬</div>
+                            <div class="app-info">
+                                <div class="app-name">Simple Chat Platform</div>
+                                <div class="app-status status-live">
+                                    <span class="status-dot"></span>
+                                    v1.3
+                                </div>
+                            </div>
+                        </div>
+                        <p class="app-description">Real-time messaging platform.</p>
+                    </a>
+
+                    <a href="anagramsolver.html" class="app-card">
+                        <div class="app-header">
+                            <div class="app-icon">🤔</div>
+                            <div class="app-info">
+                                <div class="app-name">Anagram Solver</div>
+                                <div class="app-status status-live">
+                                    <span class="status-dot"></span>
+                                    v1.1
+                                </div>
+                            </div>
+                        </div>
+                        <p class="app-description">Solves anagrams using the GamePigeon dictionary.</p>
+                    </a>
+
+                    <a href="beta/anagrams.html" class="app-card">
+                        <div class="app-header">
+                            <div class="app-icon">🔠</div>
+                            <div class="app-info">
+                                <div class="app-name">Anagrams</div>
+                                <div class="app-status status-beta">
+                                    <span class="status-dot"></span>
+                                    WIP
+                                </div>
+                            </div>
+                        </div>
+                        <p class="app-description">An anagram game in the style of GamePigeon</p>
+                    </a>
+
+                    <a href="webptopng.html" class="app-card">
+                        <div class="app-header">
+                            <div class="app-icon">🔄</div>
+                            <div class="app-info">
+                                <div class="app-name">WebP to PNG Converter</div>
+                                <div class="app-status status-live">
+                                    <span class="status-dot"></span>
+                                    v1.0
+                                </div>
+                            </div>
+                        </div>
+                        <p class="app-description">Converts WebP to PNG</p>
+                    </a>
+
+                    <a href="3y3.html" class="app-card">
+                        <div class="app-header">
+                            <div class="app-icon">🔓</div>
+                            <div class="app-info">
+                                <div class="app-name">3y3 Encoder & Decoder</div>
+                                <div class="app-status status-live">
+                                    <span class="status-dot"></span>
+                                    v1.0
+                                </div>
+                            </div>
+                        </div>
+                        <p class="app-description">Create invisible text that actually has meaning!</p>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="https://github.com/zfex77" class="footer-link" target="_blank">GitHub</a>
+                    <div class="footer-divider"></div>
+                    <span class="copyright">by zfex77</span>
+                </div>
             </div>
-            <ul class="tool-list">
-                <li class="tool-item">
-                    <a href="https://simplechat.pages.dev" class="tool-link">
-                        <div class="tool-info">
-                            <div class="tool-icon">
-                                <div class="tool-icon-emoji">💬</div>
-                            </div>
-                            <span class="tool-name">Simple Chat Platform</span>
-                        </div>
-                    </a>
-                </li>
-                <li class="tool-item">
-                    <a href="anagramsolver.html" class="tool-link">
-                        <div class="tool-info">
-                            <div class="tool-icon">
-                                <div class="tool-icon-emoji">🤔</div>
-                            </div>
-                            <span class="tool-name">Anagram Solver</span>
-                        </div>
-                    </a>
-                </li>
-                <li class="tool-item">
-                    <a href="beta/anagrams.html" class="tool-link">
-                        <div class="tool-info">
-                            <div class="tool-icon">
-                                <div class="tool-icon-emoji">🔠</div>
-                            </div>
-                            <span class="tool-name">Anagrams (Beta)</span>
-                        </div>
-                    </a>
-                </li>
-                <li class="tool-item">
-                    <a href="webptopng.html" class="tool-link">
-                        <div class="tool-info">
-                            <div class="tool-icon">
-                                <div class="tool-icon-emoji">🔄</div>
-                            </div>
-                            <span class="tool-name">WebP to PNG Converter</span>
-                        </div>
-                    </a>
-                </li>
-                <li class="tool-item">
-                    <a href="3y3.html" class="tool-link">
-                        <div class="tool-info">
-                            <div class="tool-icon">
-                                <div class="tool-icon-emoji">🔓</div>
-                            </div>
-                            <span class="tool-name">3y3 Encoder & Decoder</span>
-                        </div>
-                    </a>
-                </li>
-            </ul>
-        </div>
+        </footer>
     </div>
-
-    <script>
-        // Create enhanced starry night particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            const particleCount = 80;
-
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                
-                // Randomly assign sizes
-                const sizeRandom = Math.random();
-                if (sizeRandom < 0.6) {
-                    particle.classList.add('small');
-                } else if (sizeRandom < 0.85) {
-                    particle.classList.add('medium');
-                } else {
-                    particle.classList.add('large');
-                }
-
-                // Randomly assign colors (20% chance for colored particles)
-                if (Math.random() < 0.2) {
-                    particle.classList.add('colored');
-                    const colorRandom = Math.random();
-                    if (colorRandom < 0.4) {
-                        particle.classList.add('blue');
-                    } else if (colorRandom < 0.7) {
-                        particle.classList.add('green');
-                    } else {
-                        particle.classList.add('orange');
-                    }
-                }
-                
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
-
-        // Initialize particles when page loads
-        document.addEventListener('DOMContentLoaded', createParticles);
-
-        // Add smooth scrolling and enhanced interactions
-        document.querySelectorAll('.tool-link').forEach(link => {
-            link.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.02)';
-            });
-            
-            link.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
-        });
-    </script>
 </body>
 </html>

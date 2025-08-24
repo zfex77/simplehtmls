@@ -1,0 +1,1 @@
+- Anagram Solver has weird gradient issue on mobile near the bottom in dark mode

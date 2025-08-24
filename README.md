@@ -4,7 +4,7 @@ These are just some HTMLs that I made for fun with a little help from the goats 
 
 
 
-![logo](https://raw.githubusercontent.com/zfex77/simplehtmls/src/plasticdots-personal-use-regular.png)
+![logo](https://p82.cooltext.com/Rendered/Cool%20Text%20-%20SimpleHTMLS%20489448627528729.png)
 
 ## <ins>Ways to Access</ins>
 - https://zfex77.github.io/simplehtmls

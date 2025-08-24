@@ -1,4 +1,4 @@
-![simp chat](https://github.com/zfex77/simplechat/assets/139940269/b7e5ccc1-6466-4b00-a137-90c671babb06)
+# SimpleChat
 ***
 A chatting application that uses the PubNub API. Part of the [SimpleHTMLs](https://github.com/zfex77/simplehtmls) project.
 

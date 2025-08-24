@@ -13,6 +13,12 @@
             box-sizing: border-box;
         }
         
+        html {
+            height: 100%;
+            height: 100vh;
+            height: 100dvh;
+        }
+        
         :root {
             --glass-bg-light: rgba(255, 255, 255, 0.1);
             --glass-border-light: rgba(255, 255, 255, 0.18);
@@ -46,7 +52,9 @@
             background: var(--bg-gradient-light);
             background-size: 400% 400%;
             animation: gradientShift 20s ease infinite;
+            min-height: 100%;
             min-height: 100vh;
+            min-height: 100dvh;
             color: var(--text-primary-light);
             font-feature-settings: 'kern' 1, 'liga' 1;
             -webkit-font-smoothing: antialiased;
@@ -54,6 +62,7 @@
             overflow-x: hidden;
             position: relative;
             transition: all 0.6s ease;
+            background-attachment: fixed;
         }
 
         body.dark-mode {
@@ -79,6 +88,8 @@
             left: 0;
             width: 100%;
             height: 100%;
+            height: 100vh;
+            height: 100dvh;
             pointer-events: none;
             z-index: 0;
             background: 
@@ -109,6 +120,8 @@
             left: 0;
             width: 100%;
             height: 100%;
+            height: 100vh;
+            height: 100dvh;
             pointer-events: none;
             z-index: 0;
             opacity: 0;
@@ -188,6 +201,7 @@
             position: relative;
             z-index: 1;
             min-height: 100vh;
+            min-height: 100dvh;
             display: grid;
             grid-template-columns: 400px 1fr;
             gap: 32px;
@@ -390,6 +404,7 @@
         .results-card {
             padding: 32px;
             height: calc(100vh - 64px);
+            height: calc(100dvh - 64px);
             display: flex;
             flex-direction: column;
         }
@@ -432,7 +447,7 @@
             border-color: rgba(255, 255, 255, 0.08);
         }
 
-        .settings-btn, .theme-toggle {
+        .settings-btn {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
@@ -443,21 +458,19 @@
             font-size: 1.1rem;
         }
 
-        body.dark-mode .settings-btn,
-        body.dark-mode .theme-toggle {
+        body.dark-mode .settings-btn {
             background: rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.08);
             color: var(--text-muted-dark);
         }
 
-        .settings-btn:hover, .theme-toggle:hover {
+        .settings-btn:hover {
             background: rgba(255, 255, 255, 0.15);
             color: var(--text-primary-light);
             transform: translateY(-1px);
         }
 
-        body.dark-mode .settings-btn:hover,
-        body.dark-mode .theme-toggle:hover {
+        body.dark-mode .settings-btn:hover {
             background: rgba(255, 255, 255, 0.12);
             color: var(--text-primary-dark);
         }
@@ -472,7 +485,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 16px;
             padding: 20px;
-            min-width: 280px;
+            min-width: 320px;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
             z-index: 100;
             opacity: 0;
@@ -584,6 +597,36 @@
 
         body.dark-mode .settings-option label {
             color: var(--text-secondary-dark);
+        }
+
+        .theme-toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        body.dark-mode .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--text-secondary-dark);
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        body.dark-mode .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
         }
 
         .file-input-wrapper {
@@ -826,6 +869,7 @@
 
             .results-card {
                 height: 60vh;
+                height: 60dvh;
             }
         }
 
@@ -853,6 +897,10 @@
                 height: 44px;
                 font-size: 0.9rem;
                 padding: 12px 16px;
+            }
+
+            .settings-dropdown {
+                min-width: 280px;
             }
         }
     </style>
@@ -890,10 +938,16 @@
                     <h3 class="results-title">Words Found</h3>
                     <div class="header-controls">
                         <span class="results-count" id="resultsCount">...</span>
-                        <div class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</div>
                         <div class="settings-btn" id="settingsBtn" style="position: relative;" title="Settings">
                             ⚙️
                             <div class="settings-dropdown" id="settingsDropdown">
+                                <div class="settings-section">
+                                    <label class="settings-label">Theme:</label>
+                                    <button class="theme-toggle-btn" id="themeToggleBtn">
+                                        <span id="themeIcon">🌙</span>
+                                        <span id="themeText">Dark Mode</span>
+                                    </button>
+                                </div>
                                 <div class="settings-section">
                                     <label class="settings-label">Sort by:</label>
                                     <div class="settings-option">
@@ -945,19 +999,20 @@
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
             const body = document.body;
-            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
             
             if (isDarkMode) {
                 body.classList.add('dark-mode');
-                themeToggle.textContent = '☀️';
-                themeToggle.title = 'Switch to light mode';
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
                 if (effectsEnabled) {
                     createParticles();
                 }
             } else {
                 body.classList.remove('dark-mode');
-                themeToggle.textContent = '🌙';
-                themeToggle.title = 'Switch to dark mode';
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark Mode';
                 clearParticles();
             }
         }
@@ -1261,7 +1316,7 @@
         }
 
         // Event listeners
-        document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
+        document.getElementById('themeToggleBtn').addEventListener('click', toggleDarkMode);
 
         // Settings functionality
         document.getElementById('settingsBtn').addEventListener('click', (e) => {
